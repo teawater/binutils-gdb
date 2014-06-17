@@ -4347,7 +4347,7 @@ extended_remote_detach (struct target_ops *ops, const char *args, int from_tty)
 /* Same as remote_detach, but don't send the "D" packet; just disconnect.  */
 
 static void
-remote_disconnect (struct target_ops *target, char *args, int from_tty)
+remote_disconnect (struct target_ops *target, const char *args, int from_tty)
 {
   if (args)
     error (_("Argument given to \"disconnect\" when remotely debugging."));
@@ -8988,7 +8988,7 @@ remote_search_memory (struct target_ops* ops,
 }
 
 static void
-remote_rcmd (struct target_ops *self, char *command,
+remote_rcmd (struct target_ops *self, const char *command,
 	     struct ui_file *outbuf)
 {
   struct remote_state *rs = get_remote_state ();
@@ -9010,7 +9010,7 @@ remote_rcmd (struct target_ops *self, char *command,
     error (_("\"monitor\" command ``%s'' is too long."), command);
 
   /* Encode the actual command.  */
-  bin2hex ((gdb_byte *) command, p, strlen (command));
+  bin2hex ((const gdb_byte *) command, p, strlen (command));
 
   if (putpkt (rs->buf) < 0)
     error (_("Communication problem with target."));

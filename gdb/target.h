@@ -414,7 +414,7 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
     void (*to_detach) (struct target_ops *ops, const char *, int)
       TARGET_DEFAULT_IGNORE ();
-    void (*to_disconnect) (struct target_ops *, char *, int)
+    void (*to_disconnect) (struct target_ops *, const char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     void (*to_resume) (struct target_ops *, ptid_t, int, enum gdb_signal)
       TARGET_DEFAULT_NORETURN (noprocess ());
@@ -560,7 +560,7 @@ struct target_ops
     void (*to_stop) (struct target_ops *, ptid_t)
       TARGET_DEFAULT_IGNORE ();
     void (*to_rcmd) (struct target_ops *,
-		     char *command, struct ui_file *output)
+		     const char *command, struct ui_file *output)
       TARGET_DEFAULT_FUNC (default_rcmd);
     char *(*to_pid_to_exec_file) (struct target_ops *, int pid)
       TARGET_DEFAULT_RETURN (NULL);
@@ -815,7 +815,8 @@ struct target_ops
 
 
     /* Implement the "info proc" command.  */
-    void (*to_info_proc) (struct target_ops *, char *, enum info_proc_what);
+    void (*to_info_proc) (struct target_ops *, const char *,
+			  enum info_proc_what);
 
     /* Tracepoint-related operations.  */
 
@@ -1177,7 +1178,7 @@ extern void target_detach (const char *, int);
 /* Disconnect from the current target without resuming it (leaving it
    waiting for a debugger).  */
 
-extern void target_disconnect (char *, int);
+extern void target_disconnect (const char *, int);
 
 /* Resume execution of the target process PTID (or a group of
    threads).  STEP says whether to single-step or to run free; SIGGNAL
@@ -1232,7 +1233,7 @@ struct address_space *target_thread_address_space (ptid_t);
    an error was encountered while attempting to handle the
    request.  */
 
-int target_info_proc (char *, enum info_proc_what);
+int target_info_proc (const char *, enum info_proc_what);
 
 /* Returns true if this target can debug multiple processes
    simultaneously.  */

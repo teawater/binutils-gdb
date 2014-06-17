@@ -1,3 +1,44 @@
+2014-06-16  Keith Seitz  <keiths@redhat.com>
+
+	PR mi/15863
+	* mi/mi-cmd-var.c (mi_cmd_var_update_iter): Do not attempt
+	to update the varobj if inferior_ptid is null_ptid.
+
+2014-06-16  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_info_proc>: Make parameter
+	const.
+	(target_info_proc): Update.
+	* target.c (target_info_proc): Make "args" const.
+	* procfs.c (procfs_info_proc): Update.
+	* linux-tdep.c (linux_info_proc): Update.
+	(linux_core_info_proc_mappings): Make "args" const.
+	(linux_core_info_proc): Update.
+	* gdbarch.sh (info_proc, core_info_proc): Make "args" const.
+	* gdbarch.c: Rebuild.
+	* gdbarch.h: Rebuild.
+	* corelow.c (core_info_proc): Update.
+
+2014-06-16  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_disconnect>: Make parameter
+	const.
+	(target_disconnect): Update.
+	* target.c (target_disconnect): Make "args" const.
+	* target-delegates.c: Rebuild.
+	* remote.c (remote_disconnect): Update.
+	* record.h (record_disconnect): Update.
+	* record.c (record_disconnect): Update.
+	* inf-child.c (inf_child_disconnect): Update.
+
+2014-06-16  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_rcmd>: Make "command" const.
+	* target.c (debug_to_rcmd, default_rcmd): Update.
+	* target-delegates.c: Rebuild.
+	* remote.c (remote_rcmd): Update.
+	* monitor.c (monitor_rcmd): Update.
+
 2014-06-16  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (insert_bp_location, remove_breakpoint_1): Adjust.
