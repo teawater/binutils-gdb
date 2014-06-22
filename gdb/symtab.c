@@ -1615,7 +1615,7 @@ lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
 {
   const struct objfile *objfile;
   struct symbol *sym;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   const struct block *block;
   struct symtab *s;
 
@@ -1655,7 +1655,7 @@ lookup_symbol_aux_objfile (struct objfile *objfile, int block_index,
 			   const char *name, const domain_enum domain)
 {
   struct symbol *sym = NULL;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   const struct block *block;
   struct symtab *s;
 
@@ -1758,7 +1758,7 @@ lookup_symbol_aux_quick (struct objfile *objfile, int kind,
 			 const char *name, const domain_enum domain)
 {
   struct symtab *symtab;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   const struct block *block;
   struct symbol *sym;
 
@@ -1946,7 +1946,7 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int kind,
 				     const char *name)
 {
   struct symtab *symtab;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct block *block;
   struct symbol *sym;
 
@@ -1979,7 +1979,7 @@ basic_lookup_transparent_type (const char *name)
 {
   struct symbol *sym;
   struct symtab *s = NULL;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct objfile *objfile;
   struct block *block;
   struct type *t;
@@ -2136,7 +2136,7 @@ struct symtab *
 find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
 {
   struct block *b;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct symtab *s = NULL;
   struct symtab *best_s = NULL;
   struct objfile *objfile;
@@ -2279,7 +2279,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   int i;
   struct linetable_entry *item;
   struct symtab_and_line val;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct bound_minimal_symbol msymbol;
   struct objfile *objfile;
 
@@ -2877,7 +2877,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
   const char *name;
   struct objfile *objfile;
   struct gdbarch *gdbarch;
-  struct block *b, *function_block;
+  const struct block *b, *function_block;
   int force_skip, skip;
 
   /* Do not change the SAL if PC was specified explicitly.  */
@@ -3516,7 +3516,7 @@ search_symbols (char *regexp, enum search_domain kind,
 		struct symbol_search **matches)
 {
   struct symtab *s;
-  struct blockvector *bv;
+  const struct blockvector *bv;
   struct block *b;
   int i = 0;
   struct block_iterator iter;
@@ -4284,7 +4284,7 @@ add_macro_name (const char *name, const struct macro_definition *ignore,
 {
   struct add_name_data *datum = (struct add_name_data *) user_data;
 
-  completion_list_add_name ((char *) name,
+  completion_list_add_name (name,
 			    datum->sym_text, datum->sym_text_len,
 			    datum->text, datum->word);
 }
@@ -4313,7 +4313,7 @@ default_make_symbol_completion_list_break_on (const char *text,
   struct symtab *s;
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
-  struct block *b;
+  const struct block *b;
   const struct block *surrounding_static_block, *surrounding_global_block;
   struct block_iterator iter;
   /* The symbol we are completing on.  Points in same buffer as text.  */
@@ -4923,7 +4923,7 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
   struct symtab_and_line prologue_sal;
   CORE_ADDR start_pc;
   CORE_ADDR end_pc;
-  struct block *bl;
+  const struct block *bl;
 
   /* Get an initial range for the function.  */
   find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);

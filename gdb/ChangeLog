@@ -1,3 +1,487 @@
+2014-06-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix --with-system-readline with readline-6.3 patch 5.
+	* tui/tui-io.c (tui_old_rl_getc_function, tui_old_rl_redisplay_function)
+	(tui_old_rl_prep_terminal, tui_old_rl_deprep_terminal): Use rl_*_t
+	types.
+
+2014-06-20  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dw2_get_real_path): Use correct type in
+	OBSTACK_CALLOC.
+	* gdb_obstack.h (OBSTACK_ZALLOC, OBSTACK_CALLOC): Cast result.
+
+2014-06-20  Gary Benson  <gbenson@redhat.com>
+
+	* common/gdb_thread_db.h: Moved to nat.  All includes updated.
+	* common/glibc_thread_db.h: Likewise.
+	* common/i386-cpuid.h: Likewise.
+	* common/i386-gcc-cpuid.h: Likewise.
+	* common/linux-btrace.h: Likewise.
+	* common/linux-osdata.h: Likewise.
+	* common/linux-procfs.h: Likewise.
+	* common/linux-ptrace.h: Likewise.
+	* common/mips-linux-watch.h: Likewise.
+	* common/linux-btrace.c: Moved to nat.
+	* common/linux-osdata.c: Likewise.
+	* common/linux-procfs.c: Likewise.
+	* common/linux-ptrace.c: Likewise.
+	* common/mips-linux-watch.c: Likewise.
+	* nat/gdb_thread_db.h: Moved from common.
+	* nat/glibc_thread_db.h: Likewise.
+	* nat/i386-cpuid.h: Likewise.
+	* nat/i386-gcc-cpuid.h: Likewise.
+	* nat/linux-btrace.c: Likewise.
+	* nat/linux-btrace.h: Likewise.
+	* nat/linux-osdata.c: Likewise.
+	* nat/linux-osdata.h: Likewise.
+	* nat/linux-procfs.c: Likewise.
+	* nat/linux-procfs.h: Likewise.
+	* nat/linux-ptrace.c: Likewise.
+	* nat/linux-ptrace.h: Likewise.
+	* nat/mips-linux-watch.c: Likewise.
+	* nat/mips-linux-watch.h: Likewise.
+	* Makefile.in (HFILES_NO_SRCDIR): Reflect new locations.
+	(object file files): Reordered.
+	* gdb/copyright.py (EXCLUDE_LIST): Reflect new location
+	of glibc_thread_db.h.
+
+2014-06-20  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.h (debug_hw_points): Moved to nat/i386-dregs.c.
+	(i386_dr_low_type): Moved to nat/i386-dregs.h.
+	(i386_dr_low): Likewise.
+	(i386_dr_low_can_set_addr): Moved to nat/i386-dregs.c.
+	(i386_dr_low_set_addr): Likewise.
+	(i386_dr_low_get_addr): Likewise.
+	(i386_dr_low_can_set_control): Likewise.
+	(i386_dr_low_set_control): Likewise.
+	(i386_dr_low_get_control): Likewise.
+	(i386_dr_low_get_status): Likewise.
+	(i386_get_debug_register_length): Likewise.
+	* nat/i386-dregs.h (i386_dr_low_type): Moved from i386-nat.h.
+	(i386_dr_low): Likewise.
+	* nat/i386-dregs.c (i386-low.h): Remove include.
+	(i386-nat.h): Likewise.
+	(nat/i386-dregs.h): New include.
+	(i386_dr_low_can_set_addr): Moved from i386-nat.h.
+	(i386_dr_low_set_addr): Likewise.
+	(i386_dr_low_get_addr): Likewise.
+	(i386_dr_low_can_set_control): Likewise.
+	(i386_dr_low_set_control): Likewise.
+	(i386_dr_low_get_control): Likewise.
+	(i386_dr_low_get_status): Likewise.
+	(i386_get_debug_register_length): Likewise.
+	(debug_hw_points): Likewise.
+
+2014-06-19  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* Makefile.in (SFILES): Add d-exp.y.
+	(YYFILES): Add d-exp.c.
+	(YYOBJ): Add d-exp.o.
+	(local-maintainer-clean): Delete d-exp.c.
+	* d-exp.y: New file.
+	* d-lang.h (d_parse): New declaration.
+	(d_error): New declaration.
+	* d-lang.c (d_op_print_tab): Add entry for BINOP_CONCAT and BINOP_EXP.
+	Set BINOP_EQUAL and BINOP_NOTEQUAL to same precedence as other
+	PREC_ORDER operators.
+	(d_language_defn): Use d_parse, d_error instead of c_parse, c_error.
+
+2014-06-19  Yao Qi  <yao@codesourcery.com>
+
+	* gdbthread.h (any_running): Remove the declaration.
+	* thread.c (any_running): Remove.
+
+2014-06-19  Yao Qi  <yao@codesourcery.com>
+
+	* gdbthread.h (struct thread_info) <state>: Change its type to
+	'enum thread_state'.  Update comments.
+
+2014-06-19  Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (ALL_THREADS): Delete.
+	(ALL_NON_EXITED_THREADS): New macro.
+	* btrace.c (btrace_free_objfile): Use ALL_NON_EXITED_THREADS
+	instead of ALL_THREADS.
+	* infrun.c (find_thread_needs_step_over)
+	(switch_back_to_stepped_thread): Use ALL_NON_EXITED_THREADS
+	instead of ALL_THREADS.
+	* record-btrace.c (record_btrace_open)
+	(record_btrace_stop_recording, record_btrace_close)
+	(record_btrace_is_replaying, record_btrace_resume)
+	(record_btrace_find_thread_to_move, record_btrace_wait): Likewise.
+	* remote.c (append_pending_thread_resumptions): Likewise.
+	* thread.c (thread_apply_all_command): Likewise.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c (i386_stopped_by_watchpoint):
+	Use i386_dr_stopped_by_watchpoint.
+	(i386_insert_hw_breakpoint): Use i386_dr_insert_watchpoint.
+	(i386_remove_hw_breakpoint): Use i386_dr_remove_watchpoint.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
+	* nat/i386-dregs.c: New file.
+	* Makefile.in (i386-dregs.o): New rule.
+	* config/i386/cygwin.mh (NATDEPFILES): Add i386-dregs.o.
+	* config/i386/cygwin64.mh (NATDEPFILES): Likewise.
+	* config/i386/darwin.mh (NATDEPFILES): Likewise.
+	* config/i386/fbsd.mh (NATDEPFILES): Likewise.
+	* config/i386/fbsd64.mh (NATDEPFILES): Likewise.
+	* config/i386/go32.mh (NATDEPFILES): Likewise.
+	* config/i386/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/linux64.mh (NATDEPFILES): Likewise.
+	* config/i386/mingw.mh (NATDEPFILES): Likewise.
+	* config/i386/mingw64.mh (NATDEPFILES): Likewise.
+	* i386-nat.h (debug_hw_points): New declaration.
+	* i386-nat.c (breakpoint.h): Remove include.
+	(command.h): Likewise.
+	(target.h): Likewise.
+	(gdb_assert.h): Likewise.
+	(debug_hw_points): Made nonstatic.
+	(debug_printf): Now in i386-dregs.c.
+	(TARGET_HAS_DR_LEN_8): Likewise.
+	(DR_CONTROL_SHIFT): Likewise.
+	(DR_CONTROL_SIZE): Likewise.
+	(DR_RW_EXECUTE): Likewise.
+	(DR_RW_WRITE): Likewise.
+	(DR_RW_READ): Likewise.
+	(DR_RW_IORW): Likewise.
+	(DR_LEN_1): Likewise.
+	(DR_LEN_2): Likewise.
+	(DR_LEN_4): Likewise.
+	(DR_LEN_8): Likewise.
+	(DR_LOCAL_ENABLE_SHIFT): Likewise.
+	(DR_GLOBAL_ENABLE_SHIFT): Likewise.
+	(DR_ENABLE_SIZE): Likewise.
+	(DR_LOCAL_SLOWDOWN): Likewise.
+	(DR_GLOBAL_SLOWDOWN): Likewise.
+	(DR_CONTROL_RESERVED): Likewise.
+	(I386_DR_CONTROL_MASK): Likewise.
+	(I386_DR_VACANT): Likewise.
+	(I386_DR_LOCAL_ENABLE): Likewise.
+	(I386_DR_GLOBAL_ENABLE): Likewise.
+	(I386_DR_DISABLE): Likewise.
+	(I386_DR_SET_RW_LEN): Likewise.
+	(I386_DR_GET_RW_LEN): Likewise.
+	(I386_DR_WATCH_HIT): Likewise.
+	(i386_wp_op_t): Likewise.
+	(i386_show_dr): Likewise.
+	(i386_length_and_rw_bits): Likewise.
+	(i386_insert_aligned_watchpoint): Likewise.
+	(i386_remove_aligned_watchpoint): Likewise.
+	(i386_handle_nonaligned_watchpoint): Likewise.
+	(i386_update_inferior_debug_regs): Likewise.
+	(i386_insert_watchpoint): Use i386_dr_insert_watchpoint.
+	(i386_remove_watchpoint): Use i386_dr_remove_watchpoint.
+	(i386_region_ok_for_watchpoint):
+	Use i386_dr_region_ok_for_watchpoint.
+	(i386_stopped_data_address): Use i386_dr_stopped_data_address.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c (i386_insert_hw_breakpoint): Use
+	i386_insert_watchpoint.
+	(i386_remove_hw_breakpoint): Use i386_remove_watchpoint.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c (i386_dr_show): Renamed to
+	i386_show_dr and made static.  All uses updated.
+	(i386_dr_length_and_rw_bits): Renamed to
+	i386_length_and_rw_bits and made static.
+	All uses updated.
+	(i386_dr_insert_aligned_watchpoint): Renamed to
+	i386_insert_aligned_watchpoint and made static.
+	All uses updated.
+	(i386_dr_remove_aligned_watchpoint): Renamed to
+	i386_remove_aligned_watchpoint and made static.
+	All uses updated.
+	(i386_dr_update_inferior_debug_regs): Renamed to
+	i386_update_inferior_debug_regs and made static.
+	All uses updated.
+	* nat/i386-dregs.h (i386_dr_show): Removed.
+	(i386_dr_length_and_rw_bits): Likewise.
+	(i386_dr_insert_aligned_watchpoint): Likewise.
+	(i386_dr_remove_aligned_watchpoint): Likewise.
+	(i386_dr_update_inferior_debug_regs): Likewise.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
+	* configure.ac [AC_CHECK_FUNCS] <sigaltstack>: New check.
+	* configure: Regenerate.
+	* config.in: Likewise.
+	* main.c (signal.h): New include.
+	(setup_alternate_signal_stack): New function.
+	(captured_main): Call the above.
+	* cp-support.c (signal.h): New include.
+	(catch_demangler_crashes): New flag.
+	(SIGJMP_BUF): New define.
+	(SIGSETJMP): Likewise.
+	(SIGLONGJMP): Likewise.
+	(gdb_demangle_jmp_buf): New static global.
+	(gdb_demangle_attempt_core_dump): Likewise.
+	(gdb_demangle_signal_handler): New function.
+	(gdb_demangle): If catch_demangler_crashes is set, install the
+	above signal handler before calling bfd_demangle, and restore
+	the original signal handler afterwards.  Display the offending
+	symbol and call demangler_warning the first time a segmentation
+	fault is caught.
+	(_initialize_cp_support): New maint set/show command.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
+	* utils.h (resource_limit_kind): New enum.
+	(can_dump_core): New declaration.
+	(warn_cant_dump_core): Likewise.
+	(dump_core): Likewise.
+	* utils.c (dump_core): Made nonstatic.  Added new
+	parameter "limit_kind".
+	(can_dump_core): Made nonstatic. Moved printing code to...
+	(warn_cant_dump_core): New function.
+	(can_dump_core_warn): Likewise.
+	(internal_vproblem): Replace calls to can_dump_core with
+	calls to can_dump_core_warn.  Supply new argument to each.
+
+2014-06-19  Gary Benson  <gbenson@redhat.com>
+
+	* utils.h (demangler_vwarning): New declaration.
+	(demangler_warning): Likewise.
+	* utils.c (struct internal_problem)
+	<user_settable_should_quit>: New field.
+	<user_settable_should_dump_core>: Likewise
+	(internal_error_problem): Add values for above new fields.
+	(internal_warning_problem): Likewise.
+	(demangler_warning_problem): New static global.
+	(demangler_vwarning): New function.
+	(demangler_warning): Likewise.
+	(add_internal_problem_command): Selectively add commands.
+	(_initialize_utils): New internal problem command.
+	* maint.c (maintenance_demangler_warning): New function.
+	(_initialize_maint_cmds): New command.
+
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
+	* f-valprint.c (info_common_command_for_block): Update.
+	* symtab.h (struct general_symbol_info) <common_block>: Now
+	const.
+
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.h (struct symtab) <blockvector>: Now const.
+	* ada-lang.c (ada_add_global_exceptions): Update.
+	* buildsym.c (augment_type_symtab): Update.
+	* dwarf2read.c (dw2_lookup_symbol): Update.
+	* jit.c (finalize_symtab): Update.
+	* jv-lang.c (add_class_symtab_symbol): Update.
+	* mdebugread.c (parse_symbol, add_block, sort_blocks, new_symtab):
+	Update.
+	* objfiles.c (objfile_relocate1): Update.
+	* psymtab.c (lookup_symbol_aux_psymtabs)
+	(maintenance_check_psymtabs): Update.
+	* python/py-symtab.c (stpy_global_block, stpy_static_block):
+	Update.
+	* spu-tdep.c (spu_catch_start): Update.
+	* symmisc.c (dump_symtab_1): Update.
+	* symtab.c (lookup_global_symbol_from_objfile)
+	(lookup_symbol_aux_objfile, lookup_symbol_aux_quick)
+	(basic_lookup_transparent_type_quick)
+	(basic_lookup_transparent_type, find_pc_sect_symtab)
+	(find_pc_sect_line, search_symbols): Update.
+	* block.c (find_block_in_blockvector): Make "bl" const.
+	(blockvector_for_pc_sect, blockvector_for_pc): Make return type
+	const.
+	(blockvector_contains_pc): Make "bv" const.
+	(block_for_pc_sect): Update.
+	* block.h (blockvector_for_pc, blockvector_for_pc_sect)
+	(blockvector_contains_pc): Update.
+	* breakpoint.c (resolve_sal_pc): Update.
+	* inline-frame.c (block_starting_point_at): Update.
+
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
+	* completer.c (complete_line): Make "line_buffer" const.
+	* completer.h (complete_line): Update.
+
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.c (add_macro_name): Remove unneeded cast.
+
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-setshow.h (parse_cli_boolean_value): Update.
+	* cli/cli-setshow.c (parse_cli_boolean_value): Make "arg" const.
+
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
+	* probe.c (info_probes_for_ops): Make "arg" const.
+	* probe.h (info_probes_for_ops): Update.
+
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
+	* varobj.c (varobj_create): Update.
+	* valops.c (value_of_this): Update.
+	* tracepoint.c (add_local_symbols, scope_info): Update.
+	* symtab.h (struct general_symbol_info) <block>: Now const.
+	* symtab.c (skip_prologue_sal)
+	(default_make_symbol_completion_list_break_on)
+	(skip_prologue_using_sal): Update.
+	* stack.h (iterate_over_block_locals)
+	(iterate_over_block_local_vars): Update.
+	* stack.c (print_frame_args): Update.
+	(iterate_over_block_locals, iterate_over_block_local_vars): Make
+	parameter const.
+	(get_selected_block): Make return type const.
+	* python/py-frame.c (frapy_block): Update.
+	* python/py-block.c (gdbpy_block_for_pc): Update.
+	* p-exp.y (%union) <bval>: Now const.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Update.
+	* mdebugread.c (mylookup_symbol, parse_procedure): Update.
+	* m2-exp.y (%union) <bval>: Now const.
+	* linespec.c (get_current_search_block): Make return type const.
+	(create_sals_line_offset, find_label_symbols): Update.
+	* inline-frame.c (inline_frame_sniffer, skip_inline_frames):
+	Update.
+	(block_starting_point_at): Make "block" const.
+	* infrun.c (insert_exception_resume_breakpoint): Make "b" const.
+	(check_exception_resume): Update.
+	* guile/scm-frame.c (gdbscm_frame_block): Update.
+	* guile/scm-block.c (gdbscm_lookup_block): Update.
+	* frame.h (get_frame_block): Update.
+	(get_selected_block): Make return type const.
+	* frame.c (frame_id_inner): Update.
+	* f-valprint.c (info_common_command_for_block)
+	(info_common_command): Update.
+	* dwarf2loc.c (dwarf2_find_location_expression)
+	(dwarf_expr_frame_base, dwarf2_compile_expr_to_ax)
+	(locexpr_describe_location_piece): Update.
+	* c-exp.y (%union) <bval>: Now const.
+	* breakpoint.c (resolve_sal_pc): Update.
+	* blockframe.c (get_frame_block):Make return type const.
+	(get_pc_function_start, get_frame_function, find_pc_sect_function)
+	(block_innermost_frame): Update.
+	* block.h (blockvector_for_pc, blockvector_for_pc_sect)
+	(block_for_pc, block_for_pc_sect): Update.
+	* block.c (blockvector_for_pc_sect, blockvector_for_pc): Make
+	'pblock' const.
+	(block_for_pc_sect, block_for_pc): Make return type const.
+	* ax-gdb.c (gen_expr): Update.
+	* alpha-mdebug-tdep.c (find_proc_desc): Update.
+	* ada-lang.c (ada_read_renaming_var_value): Make 'block' const.
+	(ada_make_symbol_completion_list, ada_add_exceptions_from_frame)
+	(ada_read_var_value): Update.
+	* ada-exp.y (struct name_info) <block>: Now const.
+	(%union): Likewise.
+	(block_lookup): Constify.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
+	* nat/i386-dregs.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add the above.
+	* i386-nat.h (i386-dregs.h): New include.
+	(DR_FIRSTADDR): Now in i386-dregs.h.
+	(DR_LASTADDR): Likewise.
+	(DR_NADDR): Likewise.
+	(DR_STATUS): Likewise.
+	(DR_CONTROL): Likewise.
+	(i386_debug_reg_state): Likewise.
+	* i386-nat.c (ALL_DEBUG_REGISTERS): Likewise.
+
+2014-06-18  Don Breazeal  <donb@codesourcery.com>
+
+	* breakpoint.c (set_longjmp_breakpoint): Call
+	momentary_breakpoint_from_master with additional argument.
+	(set_longjmp_breakpoint_for_call_dummy): Call
+	momentary_breakpoint_from_master with additional argument.
+	(set_std_terminate_breakpoint): Call
+	momentary_breakpoint_from_master with additional argument.
+	(momentary_breakpoint_from_master): Add argument to function
+	definition and use it to initialize structure member flag.
+	(clone_momentary_breakpoint): Call 
+	momentary_breakpoint_from_master with additional argument.
+	* infrun.c (follow_inferior_reset_breakpoints): Clear structure
+	member flags set in momentary_breakpoint_from_master.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c (i386_show_dr): Renamed to
+	i386_dr_show and made nonstatic.  All uses updated.
+	(i386_length_and_rw_bits): Renamed to
+	i386_dr_length_and_rw_bits and made nonstatic.
+	All uses updated.
+	(i386_insert_aligned_watchpoint): Renamed to
+	i386_dr_insert_aligned_watchpoint and made nonstatic.
+	All uses updated.
+	(i386_remove_aligned_watchpoint): Renamed to
+	i386_dr_remove_aligned_watchpoint and made nonstatic.
+	All uses updated.
+	(i386_update_inferior_debug_regs): Renamed to
+	i386_dr_update_inferior_debug_regs and made nonstatic.
+	All uses updated.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c (i386_dr_low_can_set_addr): New macro.
+	(i386_dr_low_can_set_control): Likewise.
+	(i386_dr_low_set_addr): Likewise.
+	(i386_dr_low_set_control): Likewise.
+	(i386_dr_low_get_addr): Likewise.
+	(i386_dr_low_get_status): Likewise.
+	(i386_dr_low_get_control): Likewise.
+	(i386_insert_aligned_watchpoint): Use new macros.
+	(i386_update_inferior_debug_regs): Likewise.
+	(i386_stopped_data_address): Likewise.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c (i386_update_inferior_debug_regs) <state>:
+	New parameter.  All uses updated.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c (maint_show_dr): Renamed to debug_hw_points.
+	All uses updated.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c (debug_printf): New macro.
+	(i386_get_debug_register_length): Likewise.
+	(TARGET_HAS_DR_LEN_8): Use above macro.
+	(i386_show_dr): Use debug_printf instead of puts_unfiltered
+	and printf_unfiltered.  Use phex to format values.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c (i386_handle_nonaligned_watchpoint) <size_try_array>:
+	Make const.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c: Comment changes.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c (I386_DR_WATCH_MASK): Remove macro.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c (i386_length_and_rw_bits): Remove prototype.
+	(i386_insert_aligned_watchpoint): Likewise.
+	(i386_remove_aligned_watchpoint): Likewise.
+	(i386_handle_nonaligned_watchpoint): Likewise.
+
+2014-06-18  Gary Benson  <gbenson@redhat.com>
+
+	* i386-nat.c: Whitespace changes.
+
+2014-06-17  Samuel Bronson  <naesten@gmail.com>
+
+	* MAINTAINERS: Update Roland McGrath's email address.
+	Thanks to Sergio Durigan Junior for pointing out that he left
+	Red Hat a while ago, and giving me a current address.
+
 2014-06-17  Tom Tromey  <tromey@redhat.com>
 
 	* utils.h (savestring): Remove declaration.

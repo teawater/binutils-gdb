@@ -3297,7 +3297,7 @@ dw2_get_real_path (struct objfile *objfile,
 {
   if (qfn->real_names == NULL)
     qfn->real_names = OBSTACK_CALLOC (&objfile->objfile_obstack,
-				      qfn->num_file_names, char *);
+				      qfn->num_file_names, const char *);
 
   if (qfn->real_names[index] == NULL)
     qfn->real_names[index] = gdb_realpath (qfn->file_names[index]);
@@ -3616,7 +3616,7 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 	     information (but NAME might contain it).  */
 	  if (stab->primary)
 	    {
-	      struct blockvector *bv = BLOCKVECTOR (stab);
+	      const struct blockvector *bv = BLOCKVECTOR (stab);
 	      struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
 	      sym = lookup_block_symbol (block, name, domain);

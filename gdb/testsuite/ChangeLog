@@ -1,3 +1,44 @@
+2014-06-20  Gary Benson  <gbenson@redhat.com>
+
+	* gdb.arch/i386-avx.exp: Fix include file location.
+	* gdb.arch/i386-sse.exp: Likewise.
+
+2014-06-19  Iain Buclaw  <ibuclaw@gdcproject.org>
+
+	* gdb.dlang/expression.exp: New file.
+
+2014-06-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/thread-execl.exp (do_test): New procedure, factored
+	out from ...
+	(top level): ... here.  Iterate running tests under different
+	scheduler-locking settings.
+
+2014-06-18  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.cp/nsalias.exp: Set type of low_pc and high_pc entries
+	to DW_FORM_addr and use non-zero addresses.
+
+2014-06-18  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR gdb/17017
+	* gdb.python/py-xmethods.cc: Add global function call counters and
+	increment them in their respective functions.  Remove "cout"
+	statements.
+	* gdb.python/py-xmethods.exp: Make tests check the global function
+	call counters instead of depending on inferior IO.
+
+2014-06-18  Don Breazeal  <donb@codesourcery.com>
+
+	* gdb.base/foll-fork.exp (default_fork_parent_follow):
+	Deleted procedure.
+	(explicit_fork_parent_follow): Deleted procedure.
+	(explicit_fork_child_follow): Deleted procedure.
+	(test_follow_fork): New procedure.
+	(do_fork_tests): Replace calls to deleted procedures with
+	calls to test_follow_fork and reset GDB for subsequent 
+	procedure calls.
+
 2014-06-17  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/wchar.exp: Set $cent to \u00A2 if "host-charset" is
