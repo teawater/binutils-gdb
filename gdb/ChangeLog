@@ -1,3 +1,73 @@
+2014-06-25  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_generating_corefile)
+	(record_btrace_prepare_to_generate_core)
+	(record_btrace_done_generating_core): New.
+	(record_btrace_xfer_partial, record_btrace_fetch_registers)
+	(record_btrace_store_registers, record_btrace_prepare_to_store):
+	Forward request when generating a core file.
+	(record_btrace_open): Set record_btrace_generating_corefile to zero.
+	(init_record_btrace_ops): Set to_prepare_to_generate_core and
+	to_done_generating_core.
+
+2014-06-25  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* target.h (target_ops) <to_prepare_to_generate_core>
+	<to_done_generating_core>: New.
+	(target_prepare_to_generate_core, target_done_generating_core): New.
+	* target.c (target_prepare_to_generate_core)
+	(target_done_generating_core): New.
+	* target-delegates.c: Regenerate.
+	* gcore.c: (write_gcore_file): Rename to ...
+	(write_gcore_file_1): ...this.
+	(write_gcore_file): Call target_prepare_to_generate_core
+	and target_done_generating_core.
+
+2014-06-25  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* fbsd-nat.c (fbsd_make_corefile_notes): Remove make_cleanup call.
+	* gcore.c (write_gcore_file): Free memory returned from
+	make_corefile_notes.
+	* linux-tdep.c (linux_make_corefile_notes): Remove make_cleanup call.
+	* procfs.c (procfs_make_note_section): Remove make_cleanup call.
+
+2014-06-24  Yao Qi  <yao@codesourcery.com>
+
+	* arm-linux-tdep.c (arm_linux_skip_trampoline_code): New.
+	(arm_linux_init_abi): Set skip_trampoline_code with
+	gdbarch_skip_trampoline_code instead of
+	find_solib_trampoline_target.
+
+2014-06-24  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_stub_unwind_sniffer): Return 1 if
+	arm_skip_bx_reg returns non-zero.
+
+2014-06-24  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_skip_bx_reg): New function.
+	(arm_skip_stub): Call arm_skip_bx_reg.
+
+2014-06-23  Don Breazeal  <donb@codesourcery.com>
+
+	* MAINTAINERS: Add myself as write-after-approval maintainer.
+
+2014-06-23  Pedro Alves  <palves@redhat.com>
+
+	* amd64-linux-nat.c (amd64_linux_prepare_to_resume): Clear
+	DR_CONTROL before setting DR0..DR3.
+	* i386-linux-nat.c (i386_linux_prepare_to_resume): Likewise.
+	* nat/i386-dregs.c (i386_remove_aligned_watchpoint): Clear all
+	bits of DR_CONTROL related to the debug register slot being
+	disabled.  If all slots are vacant, clear local slowdown as well,
+	and assert DR_CONTROL is 0.
+
+2014-06-23  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* python/lib/gdb/command/xmethods.py
+	(get_method_matchers_in_loci):  Lookup xmethod matchers in the
+	current progspace only if the string "progspace" matches LOCUS_RE.
+
 2014-06-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix --with-system-readline with readline-6.3 patch 5.
