@@ -4443,7 +4443,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 
 	if (what.is_longjmp)
 	  {
-	    check_longjmp_breakpoint_for_call_dummy (ecs->event_thread->num);
+	    check_longjmp_breakpoint_for_call_dummy (ecs->event_thread);
 
 	    if (!frame_id_p (ecs->event_thread->initiating_frame))
 	      {
@@ -7343,7 +7343,7 @@ leave it stopped or free to run as needed."),
   signal_catch = (unsigned char *)
     xmalloc (sizeof (signal_catch[0]) * numsigs);
   signal_pass = (unsigned char *)
-    xmalloc (sizeof (signal_program[0]) * numsigs);
+    xmalloc (sizeof (signal_pass[0]) * numsigs);
   for (i = 0; i < numsigs; i++)
     {
       signal_stop[i] = 1;

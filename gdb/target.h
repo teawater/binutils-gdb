@@ -499,7 +499,7 @@ struct target_ops
       TARGET_DEFAULT_FUNC (default_terminal_info);
     void (*to_kill) (struct target_ops *)
       TARGET_DEFAULT_NORETURN (noprocess ());
-    void (*to_load) (struct target_ops *, char *, int)
+    void (*to_load) (struct target_ops *, const char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     /* Start an inferior process and set inferior_ptid to its pid.
        EXEC_FILE is the file to run.
@@ -596,10 +596,10 @@ struct target_ops
     char * (*to_make_corefile_notes) (struct target_ops *, bfd *, int *)
       TARGET_DEFAULT_FUNC (dummy_make_corefile_notes);
     /* get_bookmark support method for bookmarks */
-    gdb_byte * (*to_get_bookmark) (struct target_ops *, char *, int)
+    gdb_byte * (*to_get_bookmark) (struct target_ops *, const char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     /* goto_bookmark support method for bookmarks */
-    void (*to_goto_bookmark) (struct target_ops *, gdb_byte *, int)
+    void (*to_goto_bookmark) (struct target_ops *, const gdb_byte *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     /* Return the thread-local address at OFFSET in the
        thread-local storage for the thread PTID and the shared library
@@ -1423,7 +1423,7 @@ extern void target_kill (void);
    sections.  The target may define switches, or other non-switch
    arguments, as it pleases.  */
 
-extern void target_load (char *arg, int from_tty);
+extern void target_load (const char *arg, int from_tty);
 
 /* Some targets (such as ttrace-based HPUX) don't allow us to request
    notification of inferior events such as fork and vork immediately
