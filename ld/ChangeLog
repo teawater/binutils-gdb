@@ -1,3 +1,37 @@
+2014-07-01  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (stub_added): Delete.
+	(gld${EMULATION_NAME}_finish): Call ppc64_elf_build_stubs even when
+	none of the usual stubs have been added.  Only change entry_section
+	for ELFv1.
+
+2014-07-01  Alan Modra  <amodra@gmail.com>
+
+	* sysdep.h: Don't include limits.h and sys/param.h.  Don't
+	include unistd.h twice.
+	(LD_PATHMAX): Don't define.
+	* ldlang.c (lang_common): Don't use UINT_MAX.
+
+2014-07-01  Barney Stratford  <barney_stratford@fastmail.fm>
+            Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+            Pitchumani Sivanupandi  <pitchumani.s@atmel.com>
+            Soundararajan  <Sounderarajan.D@atmel.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add avrtiny emulation source.
+	(eavrtiny.c): Add rules for avrtiny emulation source.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add avrtiny to avr target emulations.
+	* scripttempl/avrtiny.sc: New file.  Linker script template for
+	avrtiny arch.
+	* emulparams/avrtiny.sh: New file.  Emulation parameters for
+	avrtiny arch.
+
+2014-06-30  Ulrich Drepper  <drepper@gmail.com>
+
+	* lexsup.c (parse_args): Check whether provided SONAME is empty
+	string.  If yes, warn and ignore it.  Don't overwrite valid SONAME
+	with empty string.
+
 2014-06-26  Linda Zhang  <lindasc@qq.com>
 
 	* emultempl/pe.em: Initialise insert_timestamp to true.

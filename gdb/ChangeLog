@@ -1,3 +1,45 @@
+2014-07-02  Gary Benson  <gbenson@redhat.com>
+
+	* proc-service.c (ps_xfer_memory): Update comment.
+	(ps_pstop): Remove unused function.
+	(ps_pcontinue): Likewise.
+	(ps_lstop): Likewise.
+	(ps_lcontinue): Likewise.
+	(ps_lgetxregsize): Likewise.
+	(ps_lgetxregs): Likewise.
+	(ps_lsetxregs): Likewise.
+	(ps_plog): Likewise.
+	(ps_ptread): Likewise.
+	(ps_ptwrite): Likewise.
+
+2014-07-01  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2read.c (add_array_cv_type): New function.
+	(read_tag_const_type): Call add_array_cv_type for TYPE_CODE_ARRAY.
+	(read_tag_volatile_type): Likewise.
+
+2014-07-01  Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.c (add_catch_command): Use cmd_sfunc_ftype.
+	* breakpoint.h (add_catch_command): Use cmd_sfunc_ftype.
+	* cli/cli-decode.c (cmd_cfunc_eq, add_cmd, add_prefix_cmd)
+	(add_abbrev_prefix_cmd, add_info, add_com): Use cmd_cfunc_ftype.
+	* command.h (cmd_cfunc_ftype): Move earlier.
+	(add_cmd, add_prefix_cmd, add_abbrev_prefix_cmd, cmd_cfunc_eq)
+	(add_com, add_info): Use cmd_cfunc_ftype.
+
+2014-06-30  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.c (operator_chars): Make parameters and return type
+	const.
+	(file_matches): Make "files" const.
+	(struct search_symbols_data) <files>: Now const.
+	(search_symbols): Make "regexp" and "files" parameters const.
+	Update.
+	(symtab_symbol_info): Remove cast.
+	(rbreak_command): Update.
+	* symtab.h (search_symbols): Update.
+
 2014-06-27  Yao Qi  <yao@codesourcery.com>
 
 	* breakpoint.c (check_longjmp_breakpoint_for_call_dummy):
