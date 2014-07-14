@@ -4480,6 +4480,14 @@ value.  */
 lds and sts instructions supported only tiny core.  */
   BFD_RELOC_AVR_LDS_STS_16,
 
+/* This is a 6 bit reloc for the AVR that stores an I/O register
+number for the IN and OUT instructions  */
+  BFD_RELOC_AVR_PORT6,
+
+/* This is a 5 bit reloc for the AVR that stores an I/O register
+number for the SBIC, SBIS, SBI and CBI instructions  */
+  BFD_RELOC_AVR_PORT5,
+
 /* Renesas RL78 Relocations.  */
   BFD_RELOC_RL78_NEG8,
   BFD_RELOC_RL78_NEG16,
@@ -7076,7 +7084,8 @@ typedef struct bfd_target
   /* Indicate that we are only retrieving symbol values from this section.  */
   void        (*_bfd_link_just_syms) (asection *, struct bfd_link_info *);
 
-  /* Copy the symbol type of a linker hash table entry.  */
+  /* Copy the symbol type and other attributes for a linker script
+     assignment of one symbol to another.  */
 #define bfd_copy_link_hash_symbol_type(b, t, f) \
   BFD_SEND (b, _bfd_copy_link_hash_symbol_type, (b, t, f))
   void (*_bfd_copy_link_hash_symbol_type)

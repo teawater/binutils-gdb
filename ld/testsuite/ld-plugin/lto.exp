@@ -314,7 +314,7 @@ run_cc_link_tests $lto_link_tests
 if { [is_elf_format] && [check_lto_shared_available] } {
     run_cc_link_tests $lto_link_elf_tests
     set testname "PR ld/15146 (2)"
-    set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries -Wl,--no-as-needed tmpdir/pr15146d.o tmpdir/pr15146c.so"]
+    set exec_output [run_host_cmd "$CC" "-O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries -Wl,--no-as-needed tmpdir/pr15146d.o tmpdir/pr15146c.so"]
     if { [ regexp "undefined reference to symbol 'xxx'" $exec_output ] } {
 	pass $testname
     } {
@@ -324,7 +324,20 @@ if { [is_elf_format] && [check_lto_shared_available] } {
 
 set testname "Build liblto-11.a"
 remote_file host delete "tmpdir/liblto-11.a"
-set catch_output [run_host_cmd "$ar" "rc tmpdir/liblto-11.a tmpdir/lto-11a.o tmpdir/lto-11b.o tmpdir/lto-11c.o"]
+set plugin_names {
+    liblto_plugin.so
+    liblto_plugin-0.dll
+    cyglto_plugin-0.dll
+}
+set plug_opt ""
+foreach plug $plugin_names {
+    set plug_so [run_host_cmd $CC "--print-prog-name $plug"]
+    if { $plug_so ne $plug } then {
+	set plug_opt "--plugin $plug_so"
+	break
+    }
+}
+set catch_output [run_host_cmd "$ar" "rc $plug_opt tmpdir/liblto-11.a tmpdir/lto-11a.o tmpdir/lto-11b.o tmpdir/lto-11c.o"]
 if {![string match "" $catch_output]} {
     unresolved $testname
     restore_notify
@@ -334,7 +347,7 @@ if {![string match "" $catch_output]} {
 if { [at_least_gcc_version 4 7] } {
     # Check expected LTO linker errors.
     set testname "PR ld/12942 (3)"
-    set exec_output [run_host_cmd "$CXX" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
+    set exec_output [run_host_cmd "$CXX" "-O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
     if { [ regexp "undefined reference to `link_error\\(\\)'" $exec_output ] } {
         pass $testname
     } {

@@ -1,3 +1,54 @@
+2014-07-12  David Majnemer <david.majnemer@gmail.com>
+
+	* gas/pe/set.s, * gas/pe/set.d: New test.
+	* gas/pe/pe.exp: Run it.
+
+2014-07-10  Will Newton  <will.newton@linaro.org>
+
+	* gas/elf/elf.exp: Remove special handling of arm-elf for
+	section2 test.
+	* gas/elf/section2.e-armeabi: Rename to...
+	* gas/elf/section2.e-arm: ...here.
+	* gas/elf/section2.e-armelf: Remove file.
+
+	* gas/arm/bl-local-2.d: Only enable the test on EABI and
+	NaCl configurations.
+	* gas/arm/bl-local-v4t.d: Likewise.
+	* gas/arm/blx-local.d: Likewise.
+	* gas/arm/branch-reloc.d: Likewise.
+
+2014-07-08  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* gas/i386/evex-lig256-intel.d: Updated.
+	* gas/i386/evex-lig256.d: Updated.
+	* gas/i386/evex-lig512-intel.d: Updated.
+	* gas/i386/evex-lig512-intel.d: Updated.
+	* gas/i386/x86-64-evex-lig256-intel.d: Updated.
+	* gas/i386/x86-64-evex-lig256.d: Updated.
+	* gas/i386/x86-64-evex-lig512-intel.d: Updated.
+	* gas/i386/x86-64-evex-lig512-intel.d: Updated.
+
+2014-07-08  Jiong Wang  <jiong.wang@arm.com>
+
+	* gas/arm/ldconst.s: Add test cases for symbol literal.
+	* gas/arm/ldconst.d: Likewise.
+	* gas/arm/vldconst.s: Add test cases for vldr.
+	* gas/arm/thumb2_vpool.s: Likewise.
+	* gas/arm/vldconst.d: New pattern for little-endian.
+	* gas/arm/thumb2_vpool.d: Likewise.
+	* gas/arm/vldconst_be.d: New pattern for big-endian.
+	* gas/arm/thumb2_vpool_be.d: Likewise.
+
+	* gas/arm/armv8-a+crypto.d: Skip for non-ELF targets.
+	* gas/arm/armv8-a+fp.d: Likewise.
+	* gas/arm/armv8-a+simd.d: Likewise.
+	* gas/arm/armv8-a-barrier-thumb.d: Likewise.
+	* gas/arm/bl-local-2.d: Likewise.
+	* gas/arm/ldgesb-bad.d: Likewise.
+	* gas/arm/ldgesh-bad.d: Likewise.
+	* gas/arm/thumb2_pool.d: Likewise.
+	* gas/arm/thumb2_pool.s: Likewise.
+
 2014-06-17  Jiong Wang  <jiong.wang@arm.com>
 
 	* gas/arm/armv8-a-it-bad.s: New check for deprecated sp_inc/dec within
