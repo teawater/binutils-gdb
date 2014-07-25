@@ -61,7 +61,7 @@ void _initialize_exec (void);
 
 /* The target vector for executable files.  */
 
-struct target_ops exec_ops;
+static struct target_ops exec_ops;
 
 /* True if the exec target is pushed on the stack.  */
 static int using_exec_ops;
@@ -951,7 +951,11 @@ exec_has_memory (struct target_ops *ops)
 	  != current_target_sections->sections_end);
 }
 
-static char *exec_make_note_section (struct target_ops *self, bfd *, int *);
+static char *
+exec_make_note_section (struct target_ops *self, bfd *obfd, int *note_size)
+{
+  error (_("Can't create a corefile"));
+}
 
 /* Fill in the exec file target vector.  Very few entries need to be
    defined.  */
@@ -1018,10 +1022,4 @@ Show writing into executable and core files."), NULL,
 			   &setlist, &showlist);
 
   add_target_with_completer (&exec_ops, filename_completer);
-}
-
-static char *
-exec_make_note_section (struct target_ops *self, bfd *obfd, int *note_size)
-{
-  error (_("Can't create a corefile"));
 }

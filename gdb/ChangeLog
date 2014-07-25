@@ -1,3 +1,461 @@
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* monitor.c (compile_pattern): Update.
+	* target.h (struct target_ops) <to_shortname, to_longname,
+	to_doc>: Now const.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-decode.c (add_cmd, add_prefix_cmd)
+	(add_abbrev_prefix_cmd, add_set_or_show_cmd, add_info)
+	(add_info_alias, add_com): Make "doc" const.
+	(print_doc_line): Make "str" const.
+	(delete_cmd): Update.
+	* cli/cli-decode.h (struct cmd_list_element) <doc>: Now const.
+	(print_doc_line): Update.
+	* cli/cli-script.c (document_command): Update.
+	* command.h (add_cmd, add_prefix_cmd, add_abbrev_prefix_cmd)
+	(add_com, add_info, add_info_alias): Update.
+	* guile/scm-cmd.c (cmdscm_destroyer): Update.
+	* python/py-cmd.c (cmdpy_destroyer): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-decode.c (print_help_for_command): Make "prefix" const.
+	(add_prefix_cmd, add_abbrev_prefix_cmd, apropos_cmd, help_list)
+	(help_cmd_list): Constify.
+	(lookup_cmd): Update.
+	* cli/cli-decode.h (struct cmd_list_element) <prefixname>: Now
+	const.
+	(help_cmd_list, apropos_cmd): Update.
+	* cli/cli-script.c (show_user): Update.
+	* cli/cli-setshow.c (cmd_show_list): Make "prefix" const.
+	* cli/cli-setshow.h (cmd_show_list): Update.
+	* command.h (add_prefix_cmd, add_abbrev_prefix_cmd, help_list)
+	(cmd_show_list): Update.
+	* guile/scm-cmd.c (cmdscm_destroyer): Update.
+	* python/py-cmd.c (cmdpy_destroyer): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-decode.c (deprecate_cmd): Make "replacement" const.
+	* cli/cli-decode.h (struct cmd_list_element) <replacement>: Now
+	const.
+	* command.h (deprecate_cmd): Update.
+	* maint.c (maintenance_do_deprecate): Add casts.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-decode.c (help_cmd): Make parameter "const".
+	* cli/cli-decode.h (help_cmd): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* stack.c (up_silently_base, down_silently_base): Make argument
+	const.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* solib.c (solib_add): Make "pattern" const.
+	* solib.h (solib_add): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* remote.c (remote_serial_open, print_packet, putpkt)
+	(putpkt_binary): Constify.
+	* remote.h (putpkt): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* monitor.c (monitor_open): Make "args" const.
+	* monitor.h (monitor_open): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* maint.c (match_bfd_flags): Make "string" const.
+	(print_bfd_section_info): Remove casts.
+	(print_objfile_section_info): Make "string" const.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* inf-child.c (inf_child_open_target): Make "arg" const.
+	* inf-child.h (inf_child_open_target): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* environ.c (unset_in_environ): Make "var" const.
+	* environ.h (unset_in_environ): Update.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-dump.c (scan_expression_with_cleanup): Return const.
+	Make "cmd" const.
+	(scan_filename_with_cleanup): Likewise.
+	(dump_memory_to_file, dump_value_to_file, restore_binary_file):
+	Make arguments const.
+	(restore_command): Update.
+
+2014-07-24  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui-io.c (tui_prep_terminal): Handle NULL rl_prompt.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* nat/linux-ptrace.c (additional_flags): New global.
+	(linux_test_for_tracesysgood, linux_test_for_tracefork): Use
+	additional_flags; don't check GDBSERVER.
+	(linux_ptrace_set_additional_flags): New function.
+	* nat/linux-ptrace.h (linux_ptrace_set_additional_flags):
+	Declare.
+	* linux-nat.c (_initialize_linux_nat): Call
+	linux_ptrace_set_additional_flags.
+
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* make-target-delegates (munge_type, write_debugmethod): New
+	functions.
+	(debug_names): New global.
+	($TARGET_DEBUG_PRINTER): New global.
+	(write_function_header): Strip TARGET_DEBUG_PRINTER from the type
+	name.
+	Write debug methods.  Generate init_debug_target.
+	* target-debug.h: New file.
+	* target-delegates.c: Rebuild.
+	* target.c: Include target-debug.h.
+	(debug_target): Hoist definition.
+	(target_kill, target_get_section_table, target_memory_map)
+	(target_flash_erase, target_flash_done, target_detach)
+	(target_disconnect, target_wait, target_resume)
+	(target_pass_signals, target_program_signals, target_follow_fork)
+	(target_mourn_inferior, target_search_memory)
+	(target_thread_address_space, target_close)
+	(target_find_new_threads, target_core_of_thread)
+	(target_verify_memory, target_insert_mask_watchpoint)
+	(target_remove_mask_watchpoint): Remove targetdebug code.
+	(debug_to_post_attach, debug_to_prepare_to_store)
+	(debug_to_files_info, debug_to_insert_breakpoint)
+	(debug_to_remove_breakpoint, debug_to_can_use_hw_breakpoint)
+	(debug_to_region_ok_for_hw_watchpoint)
+	(debug_to_can_accel_watchpoint_condition)
+	(debug_to_stopped_by_watchpoint, debug_to_stopped_data_address)
+	(debug_to_watchpoint_addr_within_range)
+	(debug_to_insert_hw_breakpoint, debug_to_remove_hw_breakpoint)
+	(debug_to_insert_watchpoint, debug_to_remove_watchpoint)
+	(debug_to_terminal_init, debug_to_terminal_inferior)
+	(debug_to_terminal_ours_for_output, debug_to_terminal_ours)
+	(debug_to_terminal_save_ours, debug_to_terminal_info)
+	(debug_to_load, debug_to_post_startup_inferior)
+	(debug_to_insert_fork_catchpoint)
+	(debug_to_remove_fork_catchpoint)
+	(debug_to_insert_vfork_catchpoint)
+	(debug_to_remove_vfork_catchpoint)
+	(debug_to_insert_exec_catchpoint)
+	(debug_to_remove_exec_catchpoint, debug_to_has_exited)
+	(debug_to_can_run, debug_to_thread_architecture, debug_to_stop)
+	(debug_to_rcmd, debug_to_pid_to_exec_file): Remove.
+	(setup_target_debug): Call init_debug_target.
+	* target.h (TARGET_DEBUG_PRINTER): New macro.
+	(struct target_ops) <to_resume, to_wait, to_pass_signals,
+	to_program_signals>: Use TARGET_DEBUG_PRINTER.
+
+2014-07-24  Gary Benson  <gbenson@redhat.com>
+
+	* exceptions.h (throw_vfatal): Renamed to...
+	(throw_vquit): New declaration.
+	(throw_quit): Likewise.
+	* exceptions.c (throw_vfatal): Renamed to...
+	(throw_vquit): New function.
+	(throw_quit): Likewise.
+	(throw_error): Call throw_verror rather than throw_it.
+	* utils.h (vfatal): Removed.
+	(fatal): Likewise.
+	* utils.c (vfatal): Removed.
+	(fatal): Likewise.
+	(internal_verror): Replaced call to fatal with call to throw_quit.
+	(quit): Replaced calls to fatal with calls to throw_quit.
+
+2014-07-23  Ajit Agarwal <ajitkum@xilinx.com>
+
+	* microblaze-tdep.c (microblaze_fetch_instruction): Use of
+	target_read_code.
+
+2014-07-23  Chen Gang <gang.chen.5i5j@gmail.com>
+
+	* microblaze-tdep.c (microblaze_dwarf2_reg_to_regnum): Check whether
+	less than zero in conditional expression.
+
+2014-07-23  Tom Tromey  <tromey@redhat.com>
+
+	* make-target-delegates ($ARGS_PART): Match trailing close paren.
+	($INTRO_PART): Don't match whitespace.
+	($METHOD_TRAILER): Move earlier.  Remove trailing semicolon and
+	argument matching.
+	($METHOD): Add $METHOD_TRAILER.
+	(trim): Rewrite.
+	(scan_target_h): New sub.
+	Change main loop not to collect state.
+	* target-delegates.c: Rebuild.
+
+2014-07-23  Gary Benson  <gbenson@redhat.com>
+
+	* cp-support.c (gdb_demangle): Fix build on systems without
+	sigaltstack.
+
+2014-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2loc.c (value_of_dwarf_reg_entry): Remove setting value address
+	for reference entry value target data value.
+
+2014-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* stack.c (read_frame_arg): Verify value_optimized_out before calling
+	value_available_contents_eq.
+
+2014-07-22  Pedro Alves  <palves@redhat.com>
+
+	* value.c (allocate_optimized_out_value): Don't mark value as
+	non-lazy.
+
+2014-07-22  Jiong Wang  <jiong.wang@arm.com>
+
+	* MAINTAINERS (Write After Approval): Update my email address.
+
+2014-07-20  Doug Evans  <dje@google.com>
+
+	PR server/17147
+	* remote.c (putpkt_binary): Add text to error message.
+
+2014-07-20  Yao Qi  <yao@codesourcery.com>
+
+	* eval.c: Remove "Chill" from comments.
+	* gdbtypes.h: Likewise.
+	* symtab.h: Likewise.
+
+2014-07-20  Yao Qi  <yao@codesourcery.com>
+
+	* std-operator.def: Update comments to TERNOP_SLICE.
+
+2014-07-20  Yao Qi  <yao@codesourcery.com>
+
+	* std-operator.def: Remove BINOP_RANGE.
+	* breakpoint.c (watchpoint_exp_is_const): Update.
+	* expprint.c (dump_subexp_body_standard): Likewise.
+	* eval.c (init_array_element): Remove dead code.
+	(evaluate_subexp_standard): Likewise.
+
+2014-07-20  Yao Qi  <yao@codesourcery.com>
+
+	* std-operator.def: Remove BINOP_IN.
+	* breakpoint.c (watchpoint_exp_is_const): Update.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* expprint.c (dump_subexp_body_standard): Likewise.
+
+2014-07-19  Ajit Agarwal  <ajitkum@xilinx.com>
+
+	* microblaze-tdep.c (microblaze_register_names): Add
+	the rshr and rslr register names.
+	(microblaze_gdbarch_init): Use of tdesc_has_registers.
+	Use of tdesc_find_feature. Use of tdesc_data_alloc.
+	Use of tdesc_numbered_register. Use of
+	microblaze_register_g_packet_guesses. Use of
+	tdesc_use_registers. Use of set_gdbarch_register_type.
+	(microblaze_register_g_packet_guesses): New.
+	* microblaze-tdep.h (microblaze_reg_num): Add
+	field MICROBLAZE_SLR_REGNUM MICROBLAZE_SHR_REGNUM
+	MICROBLAZE_NUM_REGS and MICROBLAZE_NUM_CORE_REGS.
+	(microblaze_frame_cache): Use of MICROBLAZE_NUM_REGS.
+	* features/microblaze-core.xml: New file.
+	* features/microblaze-stack-protect.xml: New file.
+	* features/microblaze-with-stack-protect.c: New file.
+	* features/microblaze-with-stack-protect.xml: New file.
+	* features/microblaze.xml: New file.
+	* features/microblaze.c: New file.
+	* features/Makefile (microblaze-with-stack-protect): Add
+	microblaze-with-stack-protect microblaze and microblaze-expedite.
+	* regformats/microblaze-with-stack-protect.dat: New file.
+	* regformats/microblaze.dat: New file.
+	* doc/gdb.texinfo (MicroBlaze Features): Added.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
+	* exec.c (exec_ops): Now static.
+	* exec.h (exec_ops): Don't declare.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
+	* spu-multiarch.c (spu_region_ok_for_hw_watchpoint): Pass "self"
+	to find_target_beneath.
+	* ravenscar-thread.c (ravenscar_prepare_to_store): Pass "ops" to
+	find_target_beneath.
+	(ravenscar_mourn_inferior): Pass "self" to find_target_beneath.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/17130:
+	* utils.c (quit): Use target_supports_terminal_ours.
+	* target.h (target_supports_terminal_ours): Declare.
+	* target.c (target_supports_delete_record): Don't check
+	to_delete_record against NULL.
+	(target_supports_terminal_ours): New function.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/17130:
+	* spu-multiarch.c (spu_region_ok_for_hw_watchpoint)
+	(spu_fetch_registers, spu_store_registers, spu_xfer_partial)
+	(spu_search_memory, spu_mourn_inferior): Simplify delegation.
+	* linux-thread-db.c (thread_db_pid_to_str): Always delegate.
+	* windows-nat.c (windows_xfer_partial): Always delegate.
+	* record-btrace.c (record_btrace_xfer_partial): Simplify
+	delegation.
+	(record_btrace_fetch_registers, record_btrace_store_registers)
+	(record_btrace_prepare_to_store, record_btrace_resume)
+	(record_btrace_wait, record_btrace_find_new_threads)
+	(record_btrace_thread_alive): Likewise.
+	* procfs.c (procfs_xfer_partial): Always delegate.
+	* corelow.c (core_xfer_partial): Always delegate.
+	* sol-thread.c (sol_find_new_threads): Simplify delegation.
+
+2014-07-18  Tom Tromey  <tromey@redhat.com>
+
+	* exec.c (exec_make_note_section): Move earlier.
+
+2014-07-17  Doug Evans  <dje@google.com>
+
+	PR gdb/17170
+	* maint.c (count_symtabs_and_blocks): Handle NULL
+	current_program_space.
+	(report_command_stats): Check global enabled flag in addition to
+	recorded enabled flag.
+	(make_command_stats_cleanup): Handle msg_type == 0, startup.
+
+2014-07-16  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (kill_callback): Use kill_lwp, not kill.
+
+2014-07-16  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_delete_record>: Reformat
+	comment.
+
+2014-07-16  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+
+2014-07-15  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* avr-tdep.c (AVR_TYPE_ADDRESS_CLASS_FLASH): New macro.
+	(AVR_TYPE_INSTANCE_FLAG_ADDRESS_CLASS_FLASH): Likewise.
+	(avr_address_to_pointer): Check for AVR_TYPE_ADDRESS_CLASS_FLASH.
+	(avr_pointer_to_address): Likewise.
+	(avr_address_class_type_flags): New function.
+	(avr_address_class_type_flags_to_name): Likewise.
+	(avr_address_class_name_to_type_flags): Likewise.
+	(avr_gdbarch_init): Set address_class_type_flags,
+	address_class_type_flags_to_name and
+	address_class_name_to_type_flags.
+
+2014-07-15  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (kill_callback): Save errno and work with saved
+	copy.
+
+2014-07-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* expprint.c (dump_subexp_body_standard): Handle OP_STRING.
+
+2014-07-14  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_can_use_hw_breakpoint): Report no hardware
+	breakpoint support correctly.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* utils.c (prompt_for_continue): Call target_terminal_ours.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* inf-loop.c (inferior_event_handler): Use TRY_CATCH instead of
+	catch_errors.  Don't re-enable stdin or notify observers where,
+	and rethrow error.
+	(fetch_inferior_event_wrapper): Delete.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
+	* top.c: Include "inf-loop.h".
+	(struct gdb_readline_wrapper_cleanup) <target_is_async_orig>: New
+	field.
+	(gdb_readline_wrapper_cleanup): Make the target async again, if it
+	was async before.
+	(gdb_readline_wrapper): Store whether the target is async, and
+	make it sync.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
+	* top.c (gdb_readline_wrapper_line): Tweak comment.
+	(gdb_readline_wrapper_cleanup): If readline is enabled, reinstall
+	the input handler callback.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
+	* main.c: Include event-top.h.
+	(handle_command_errors): New function.
+	(catch_command_errors, catch_command_errors_const): Use it.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* exceptions.c (catch_command_errors, catch_command_errors_const):
+	Moved to main.c.
+	* exceptions.h (catch_command_errors_ftype)
+	(catch_command_errors_const_ftype): Moved to main.c.
+	(catch_command_errors, catch_command_errors_const): Delete
+	declarations.
+	* main.c (catch_command_errors_ftype)
+	(catch_command_errors_const_ftype): Moved here from exceptions.h.
+	(catch_command_errors, catch_command_errors_const)): Moved here
+	from exceptions.c and make static.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* exceptions.c (print_any_exception): Delete.
+	(catch_exceptions_with_msg): Use exception_print instead of
+	print_any_exception.
+	(catch_errors): Use exception_fprintf instead of
+	print_any_exception.
+	(catch_command_errors, catch_command_errors_const): Use
+	exception_print instead of print_any_exception.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* infcall.c (run_inferior_call): Set 'sync_execution' while
+	running the inferior call.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* value.c (value_contents_equal): Delete function.
+	* value.h (value_contents_equal): Delete declaration.
+
+2014-07-14  Tom Tromey  <tromey@redhat.com>
+
+	PR exp/17106:
+	* gdbtypes.c (is_dynamic_type_internal): New function, from
+	is_dynamic_type.
+	(is_dynamic_type): Rewrite.
+	(resolve_dynamic_union): Use resolve_dynamic_type_internal.
+	(resolve_dynamic_struct): Likewise.
+	(resolve_dynamic_type_internal): New function, from
+	resolve_dynamic_type.
+	(resolve_dynamic_type): Rewrite.
+
+2014-07-14  Tom Tromey  <tromey@redhat.com>
+
+	* target.c (target_require_runnable): Also check record_stratum.
+	Update comment.
+
 2014-07-11  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (thumb_analyze_prologue): Break the loop if

@@ -713,9 +713,9 @@ compile_pattern (char *pattern, struct re_pattern_buffer *compiled_pattern,
    for communication.  */
 
 void
-monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
+monitor_open (const char *args, struct monitor_ops *mon_ops, int from_tty)
 {
-  char *name;
+  const char *name;
   char **p;
   struct inferior *inf;
 

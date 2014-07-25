@@ -1,3 +1,106 @@
+2014-07-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/amd64-entry-value-paramref.S: New file.
+	* gdb.arch/amd64-entry-value-paramref.cc: New file.
+	* gdb.arch/amd64-entry-value-paramref.exp: New file.
+	* gdb.arch/amd64-optimout-repeat.S: New file.
+	* gdb.arch/amd64-optimout-repeat.c: New file.
+	* gdb.arch/amd64-optimout-repeat.exp: New file.
+
+2014-07-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/17170
+	* gdb.base/statistics.exp: New file.
+
+2014-07-17  Doug Evans  <dje@google.com>
+
+	PR gdb/17170
+	* gdb.base/maint.exp: Update testing of per-command stats.
+
+2014-07-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/tfile.c: Include unistd.h and stdint.h.
+	(start_trace_file): Guard S_IRGRP and S_IROTH uses behind #ifdef.
+	(tfile_write_64, tfile_write_16, tfile_write_8, tfile_write_addr)
+	(tfile_write_buf): New functions.
+	(add_memory_block): Rewrite using the above.
+	(adjust_function_address): New function.
+	(FUNCTION_ADDRESS): New macro.
+	(write_basic_trace_file): Remove short_x local, and use
+	tfile_write_16. Change type of func_addr local to unsigned long
+	long.  Use FUNCTION_ADDRESS instead of handling the Thumb bit
+	here.  Cast argument of add_memory_block to char pointer.
+	(write_error_trace_file): Avoid alloca.  Use FUNCTION_ADDRESS.
+	(main): Remove parameters.
+	* gdb.trace/tfile.exp: Remove nowarnings.
+
+2014-07-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.base/debug-expr.exp: Test string evaluation with
+	"debug expression" on.
+
+2014-07-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/reread.exp: Use clean_restart.
+
+2014-07-15  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* gdb.arch/avr-flash-qualifer.c: New.
+	* gdb.arch/avr-flash-qualifer.exp: New.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/paginate-after-ctrl-c-running.c: New file.
+	* gdb.base/paginate-after-ctrl-c-running.exp: New file.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/double-prompt-target-event-error.c: New file.
+	* gdb.base/double-prompt-target-event-error.exp: New file.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
+	* gdb.base/paginate-inferior-exit.c: New file.
+	* gdb.base/paginate-inferior-exit.exp: New file.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
+	* gdb.base/paginate-bg-execution.c: New file.
+	* gdb.base/paginate-bg-execution.exp: New file.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/17072
+	* gdb.base/paginate-execution-startup.c: New file.
+	* gdb.base/paginate-execution-startup.exp: New file.
+	* lib/gdb.exp (pagination_prompt): New global.
+	(default_gdb_spawn): New procedure, factored out from
+	default_gdb_spawn.
+	(default_gdb_start): Adjust to call default_gdb_spawn.
+	(gdb_spawn): New procedure.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (gdb_assert): New procedure.
+	* gdb.trace/backtrace.exp (gdb_backtrace_tdp_4): Use it.
+
+2014-07-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/execution-termios.c: New file.
+	* gdb.base/execution-termios.exp: New file.
+
+2014-07-14  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/vla-cxx.cc: New file.
+	* gdb.cp/vla-cxx.exp: New file.
+
+2014-07-14  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.reverse/rerun-prec.c: New file.
+	* gdb.reverse/rerun-prec.exp: New file.
+
 2014-07-12  Maciej W. Rozycki  <macro@mips.com>
 	    Maciej W. Rozycki  <macro@codesourcery.com>
 

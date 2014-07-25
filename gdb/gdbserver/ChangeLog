@@ -1,3 +1,17 @@
+2014-07-24  Tom Tromey  <tromey@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* server.h (CORE_ADDR): Now unsigned.
+
+2014-07-16  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_kill_one_lwp): Use kill_lwp, not kill.
+
+2014-07-15  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_kill_one_lwp): Save errno and work with saved
+	copy.
+
 2014-07-11  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (kill_wait_lwp): New function, based on
