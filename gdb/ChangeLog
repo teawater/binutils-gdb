@@ -1,3 +1,168 @@
+2014-07-28  Will Newton  <will.newton@linaro.org>
+
+	* arm-linux-tdep.c (THUMB2_SET_R7_SIGRETURN1): New define.
+	(THUMB2_SET_R7_SIGRETURN2): Likewise.
+	(THUMB2_SET_R7_RT_SIGRETURN1): Likewise.
+	(THUMB2_SET_R7_RT_SIGRETURN2): Likewise.
+	(THUMB2_EABI_SYSCALL): Likewise.
+	(thumb2_eabi_linux_sigreturn_tramp_frame): Create new
+	struct tramp_frame.
+	(thumb2_eabi_linux_rt_sigreturn_tramp_frame): Likewise.
+	(arm_linux_init_abi): Add Thumb2 tramp frame unwinders.
+
+2014-07-27  Doug Evans  <xdje42@gmail.com>
+
+	* guile/scm-param.c (pascm_print_param_smob): Fix output.
+
+2014-07-27  Doug Evans  <xdje42@gmail.com>
+
+	* guile/guile.c (gdbscm_execute_gdb_command): Fix typo in comment.
+
+2014-07-26  Ludovic Courtès  <ludo@gnu.org>
+	    Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17146
+	* acinclude.m4 (GDB_GUILE_PROGRAM_NAMES): New macro.
+	(GDB_GUILD_TARGET_FLAG, GDB_TRY_GUILD): New macros.
+	* configure.ac: Try to use guild to compile an scm file, if it fails
+	then disable guile support.
+	* configure: Regenerate.
+	* data-directory/Makefile.in (GUILE_SOURCE_FILES): Renamed from
+	GUILE_FILE_LIST.
+	(GUILE_COMPILED_FILES): New variable.
+	(GUILE_FILES) Update.
+	(GUILD, GUILD_TARGET_FLAG, GUILD_COMPILE_FLAGS): New variables.
+	(stamp-guile): Compile scm files.
+	* guile/guile.c (boot_guile_support): New function.
+	(standard_throw_args_p): New function.
+	(print_standard_throw_error, print_throw_error): New functions.
+	(handle_boot_error): New function.
+	(initialize_scheme_side): Rewrite to call boot_guile_support.
+	* guile/lib/gdb/boot.scm: Update %load-compiled-path.  Load gdb.go.
+	* guile/lib/gdb/init.scm (%silence-compiler-warnings%): New function.
+
+2014-07-26  Ludovic Courtès  <ludo@gnu.org>
+	    Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17146
+	* data-directory/Makefile.in (GUILE_FILES): Add support.scm.
+	* guile/lib/gdb/support.scm: New file.
+	* guile/guile.c (gdbscm_init_module_name): Change to "gdb".
+	* guile/lib/gdb.scm: Load gdb/init.scm as an include file.
+	All uses updated.
+	* guile/lib/gdb/init.scm (SCM_ARG1, SCM_ARG2): Moved to support.scm.
+	All uses updated.
+	(%assert-type): Ditto, and renamed to assert-type.
+	(%exception-print-style): Delete.
+
+2014-07-26  Doug Evans  <xdje42@gmail.com>
+
+	PR build/17105
+	* configure.ac: Add AM_CONDITIONALs for HAVE_PYTHON, HAVE_GUILE.
+	* configure: Regenerate.
+	* data-directory/Makefile.in (PYTHON_FILE_LIST): Renamed from
+	PYTHON_FILES.
+	(PYTHON_FILES): New variable.
+	(GUILE_FILE_LIST): Renamed from GUILE_FILES.
+	(GUILE_FILES): New variable.
+	(stamp-python, install-python, uninstall-python): Handle empty
+	file list.
+	(stamp-guile, install-guile, uninstall-guile): Ditto.
+
+2014-07-26  Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17177
+	* guile/lib/gdb.scm (pretty-printers): Export.
+	(set-pretty-printers!): Export.
+	* guile/lib/gdb/printing.scm (gdb module): Update.
+	(prepend-pretty-printer!, append-pretty-printer!): Update.
+	* guile/scm-pretty-print.c (pretty_printer_list_name): Delete.
+	(pretty_printer_list_var): Delete.
+	(pretty_printer_list): New static global.
+	(gdbscm_pretty_printers): New function.
+	(gdbscm_set_pretty_printers_x): New function.
+	(ppscm_find_pretty_printer_from_gdb): Update.
+	(pretty_printer_functions): Add pretty-printers, set-pretty-printers!.
+	(gdbscm_initialize_pretty_printers): Update.
+
+2014-07-26  Doug Evans  <xdje42@gmail.com>
+
+	PR 17185
+	* configure.ac: Add check for header gc/gc.h.
+	Add check for function setenv.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* guile/guile.c (_initialize_guile): Add workaround for libgc 7.4.0.
+
+2014-07-25  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Also check the compressed ISA
+	variation in gdbarch matching.
+
+2014-07-25  Tom Tromey  <tromey@redhat.com>
+
+	* exec.c (using_exec_ops): Remove.
+	(exec_close_1): Update.  Remove extraneous block, reindent.
+	(add_target_sections): Use target_is_pushed.
+
+2014-07-25  Pedro Alves  <palves@redhat.com>
+
+	* go32-nat.c (go32_create_inferior): Pass 0 to clear_proceed_status.
+	* monitor.c (monitor_create_inferior): Likewise.
+	* remote-m32r-sdi.c (m32r_create_inferior): Likewise.
+	* remote-sim.c (gdbsim_create_inferior): Likewise.
+	* solib-irix.c (irix_solib_create_inferior_hook): Likewise.
+	* solib-osf.c (osf_solib_create_inferior_hook): Likewise.
+	* windows-nat.c (do_initial_windows_stuff): Likewise.
+
+2014-07-25  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention signal passing and "signal" command changes.
+	* gdbthread.h (struct thread_suspend_state) <stop_signal>: Extend
+	comment.
+	* breakpoint.c (until_break_command): Adjust clear_proceed_status
+	call.
+	* infcall.c (run_inferior_call): Adjust clear_proceed_status call.
+	* infcmd.c (proceed_thread_callback, continue_1, step_once)
+	(jump_command): Adjust clear_proceed_status call.
+	(signal_command): Warn if other thread that are resumed have
+	signals that will be delivered.  Adjust clear_proceed_status call.
+	(until_next_command, finish_command)
+	(proceed_after_attach_callback, attach_command_post_wait)
+	(attach_command): Adjust clear_proceed_status call.
+	* infrun.c (proceed_after_vfork_done): Likewise.
+	(proceed_after_attach_callback): Adjust comment.
+	(clear_proceed_status_thread): Clear stop_signal if not in pass
+	state.
+	(clear_proceed_status_callback): Delete.
+	(clear_proceed_status): New 'step' parameter.  Only clear the
+	proceed status of threads the command being prepared is about to
+	resume.
+	(proceed): If passed in an explicit signal, override stop_signal
+	with it.  Don't pass the last stop signal to the thread we're
+	resuming.
+	(init_wait_for_inferior): Adjust clear_proceed_status call.
+	(switch_back_to_stepped_thread): Clear the signal if it should not
+	be passed.
+	* infrun.h (clear_proceed_status): New 'step' parameter.
+	(user_visible_resume_ptid): Add comment.
+	* linux-nat.c (linux_nat_resume_callback): Don't check whether the
+	signal is in pass state.
+	* remote.c (append_pending_thread_resumptions): Likewise.
+	* mi/mi-main.c (proceed_thread): Adjust clear_proceed_status call.
+
+2014-07-25  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (target_stopped_data_address)
+	(target_watchpoint_addr_within_range): Use "->", not ".".  Fix
+	parentheses.
+
+2014-07-25  Pierre Langlois  <pierre.langlois@embecosm.com>
+
+	* avr-tdep.c (avr_address_to_pointer): Clarify the conversion in the
+	comments.
+	(avr_pointer_to_address): Likewise.
+
 2014-07-24  Tom Tromey  <tromey@redhat.com>
 
 	* monitor.c (compile_pattern): Update.
