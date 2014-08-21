@@ -439,6 +439,11 @@ struct remote_arch_state
   /* Description of the remote protocol registers.  */
   long sizeof_g_packet;
 
+  /* The sizeof_g_packet will be changed in some GDBstub (QEMU) when it executes.
+     Description of the remote protocol registers that get form current
+     gdbarch.  */
+  long gdbarch_sizeof_g_packet;
+
   /* Description of the remote protocol registers indexed by REGNUM
      (making an array gdbarch_num_regs in size).  */
   struct packet_reg *regs;
@@ -673,7 +678,8 @@ init_remote_state (struct gdbarch *gdbarch)
 
   /* Record the maximum possible size of the g packet - it may turn out
      to be smaller.  */
-  rsa->sizeof_g_packet = map_regcache_remote_table (gdbarch, rsa->regs);
+  rsa->gdbarch_sizeof_g_packet = map_regcache_remote_table (gdbarch, rsa->regs);
+  rsa->sizeof_g_packet = rsa->gdbarch_sizeof_g_packet;
 
   /* Default maximum number of characters in a packet body.  Many
      remote stubs have a hardwired buffer size of 400 bytes
@@ -693,8 +699,8 @@ init_remote_state (struct gdbarch *gdbarch)
      header / footer.  NOTE: cagney/1999-10-26: I suspect that 8
      (``$NN:G...#NN'') is a better guess, the below has been padded a
      little.  */
-  if (rsa->sizeof_g_packet > ((rsa->remote_packet_size - 32) / 2))
-    rsa->remote_packet_size = (rsa->sizeof_g_packet * 2 + 32);
+  if (rsa->gdbarch_sizeof_g_packet > ((rsa->remote_packet_size - 32) / 2))
+    rsa->remote_packet_size = (rsa->gdbarch_sizeof_g_packet * 2 + 32);
 
   /* Make sure that the packet buffer is plenty big enough for
      this architecture.  */
@@ -6070,7 +6076,7 @@ process_g_packet (struct regcache *regcache)
   buf_len = strlen (rs->buf);
 
   /* Further sanity checks, with knowledge of the architecture.  */
-  if (buf_len > 2 * rsa->sizeof_g_packet)
+  if (buf_len > 2 * rsa->gdbarch_sizeof_g_packet)
     error (_("Remote 'g' packet reply is too long: %s"), rs->buf);
 
   /* Save the size of the packet sent to us by the target.  It is used
@@ -6079,11 +6085,11 @@ process_g_packet (struct regcache *regcache)
   if (rsa->actual_register_packet_size == 0)
     rsa->actual_register_packet_size = buf_len;
 
-  /* If this is smaller than we guessed the 'g' packet would be,
+  /* If this is not same with we guessed the 'g' packet would be,
      update our records.  A 'g' reply that doesn't include a register's
      value implies either that the register is not available, or that
      the 'p' packet must be used.  */
-  if (buf_len < 2 * rsa->sizeof_g_packet)
+  if (buf_len != 2 * rsa->sizeof_g_packet)
     {
       rsa->sizeof_g_packet = buf_len / 2;
 
