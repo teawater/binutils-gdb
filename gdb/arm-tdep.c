@@ -26,7 +26,6 @@
 #include "infrun.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include <string.h>
 #include "dis-asm.h"		/* For register styles.  */
 #include "regcache.h"
 #include "reggroups.h"
@@ -53,7 +52,6 @@
 #include "coff/internal.h"
 #include "elf/arm.h"
 
-#include "gdb_assert.h"
 #include "vec.h"
 
 #include "record.h"
@@ -3564,8 +3562,8 @@ arm_vfp_cprc_reg_char (enum arm_vfp_cprc_base_type b)
    classified from *BASE_TYPE, or two types differently classified
    from each other, return -1, otherwise return the total number of
    base-type elements found (possibly 0 in an empty structure or
-   array).  Vectors and complex types are not currently supported,
-   matching the generic AAPCS support.  */
+   array).  Vector types are not currently supported, matching the
+   generic AAPCS support.  */
 
 static int
 arm_vfp_cprc_sub_candidate (struct type *t,
@@ -3590,6 +3588,38 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	  else if (*base_type != VFP_CPRC_DOUBLE)
 	    return -1;
 	  return 1;
+
+	default:
+	  return -1;
+	}
+      break;
+
+    case TYPE_CODE_COMPLEX:
+      /* Arguments of complex T where T is one of the types float or
+	 double get treated as if they are implemented as:
+
+	 struct complexT
+	 {
+	   T real;
+	   T imag;
+	 };
+
+      */
+      switch (TYPE_LENGTH (t))
+	{
+	case 8:
+	  if (*base_type == VFP_CPRC_UNKNOWN)
+	    *base_type = VFP_CPRC_SINGLE;
+	  else if (*base_type != VFP_CPRC_SINGLE)
+	    return -1;
+	  return 2;
+
+	case 16:
+	  if (*base_type == VFP_CPRC_UNKNOWN)
+	    *base_type = VFP_CPRC_DOUBLE;
+	  else if (*base_type != VFP_CPRC_DOUBLE)
+	    return -1;
+	  return 2;
 
 	default:
 	  return -1;

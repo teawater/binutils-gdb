@@ -1,3 +1,141 @@
+2014-08-20  Pedro Alves  <palves@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (EXTRA_RULES, CC): New variables, get from
+	configure.
+	(EXPECT): Handle READ1 being set.
+	(all): Depend on EXTRA_RULES.
+	(check-read1, expect-read1, read1.so, read1): New rules.
+	* README (Testsuite Parameters): Document the READ1 make variable.
+	(Race detection): New section.
+	* configure: Regenerate.
+	* configure.ac: If build==host==target, and running under a
+	GNU/glibc system, add read1 to the extra Makefile rules.
+	(EXTRA_RULES): AC_SUBST it.
+	* lib/read1.c: New file.
+
+2014-08-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/data-loc.exp: Add additional tests exercising
+	the handling of variables declared as a typedef to an array
+	which a DW_AT_data_location attribute.
+
+2014-08-19  Andrew Burgess  <aburgess@broadcom.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR symtab/14604
+	PR symtab/14605
+	* gdb.dwarf2/dw2-op-out-param.exp: Remove kfail branches and use
+	gdb_test.
+
+2014-08-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/watchpoint-hw-hit-once.c (main): Update comment.
+
+2014-08-19  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/watchpoint-hw-hit-once.exp: Set breakpoint on the
+	right line.
+
+2014-08-18  David Blaikie  <dblaikie@gmail.com>
+
+	* boards/fission.exp: Explicitly pass -ggnu-pubnames for clang.
+
+2014-08-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/data-loc.exp: Remove second DW_AT_upper bound
+	attribute in array range.
+
+2014-08-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/data-loc.c, gdb.dwarf2/data-loc.exp: New files.
+
+2014-08-15  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR c++/17132
+	* gdb.cp/pr17132.cc: New file.
+	* gdb.cp/pr17132.exp: New file.
+
+2014-08-15  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.python/py-xmethods.py (A_getarrayind)
+	(E_method_char_worker.__call__, E_method_int_worker.__call__):
+	Use 'print' with function call syntax.
+	(E_method_matcher.match): Fix tab vs space indentation mixup.
+
+2014-08-15  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/tfile.exp: Return -1 if generate_tracefile returns
+	false.
+
+2014-08-15  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.cp/casts.exp: Set print symbol off.
+	* gdb.cp/class2.exp: Likewise.
+	* gdb.cp/overload.exp: Likewise.
+	* gdb.cp/templates.exp: Likewise.
+
+2014-08-11  Doug Evans  <dje@google.com>
+
+	* gdb.base/print-symbol-loading.exp (test_load_core): Update.
+	(test_load_shlib): Update.
+
+2014-08-09  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/display.exp: Invoke is_address_zero_readable.
+	* gdb.guile/scm-value.exp (test_value_in_inferior): Likewise.
+	* gdb.python/py-value.exp (test_value_in_inferior): Likewise.
+	* gdb.base/hbreak-unmapped.exp: Return if
+	is_address_zero_readable returns true.
+	* gdb.base/signest.exp: Likewise.
+	* gdb.base/signull.exp: Likewise.
+	* gdb.base/sigbpt.exp: Likewise.
+	* gdb.guile/scm-disasm.exp: Do the test if
+	is_address_zero_readable returns false.
+	* gdb.guile/scm-pretty-print.exp (run_lang_tests): Likewise.
+	* gdb.python/py-arch.exp: Likewise.
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Likewise.
+	* lib/gdb.exp (is_address_zero_readable): New proc.
+
+2014-08-09  Yao Qi  <yao@codesourcery.com>
+
+	PR testsuite/13443
+	* gdb.mi/mi-var-display.exp: Make test messages unique.
+
+2014-08-04  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/sss-bp-on-user-bp-2.exp: Expect output from "set debug
+	target 0".
+
+2014-08-04  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/sss-bp-on-user-bp-2.exp: Match "to_resume", not
+	"target_resume".
+
+2014-08-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/vla-datatypes.c (vla_factory): Add new variable
+	inner_vla_struct_object_size.
+	* gdb.base/vla-datatypes.exp: Adjust last test, and mark it
+	as xfail.
+
+2014-07-30  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/signal-command-handle-nopass.exp (test): Add
+	comment.
+
+2014-07-29  Yao Qi  <yao@codesourcery.com>
+
+	PR gdb/17206
+	* gdb.base/until-nodebug.exp: New.
+
+2014-07-28  Doug Evans  <xdje42@gmail.com>
+
+	PR guile/17203
+	* gdb.guile/scm-parameter.exp: Add tests for trying to create
+	previously existing parameter, and previously ambiguously spelled
+	parameter.
+
 2014-07-28  Will Newton  <will.newton@linaro.org>
 
 	* gdb.base/varargs.exp: Remove KFAILs for ARM.

@@ -20,7 +20,6 @@
 /* See the GDB User Guide for details of the GDB remote protocol.  */
 
 #include "defs.h"
-#include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include "inferior.h"
@@ -38,7 +37,6 @@
 #include "remote-notif.h"
 #include "regcache.h"
 #include "value.h"
-#include "gdb_assert.h"
 #include "observer.h"
 #include "solib.h"
 #include "cli/cli-decode.h"
@@ -102,11 +100,8 @@ static void remote_files_info (struct target_ops *ignore);
 static void remote_prepare_to_store (struct target_ops *self,
 				     struct regcache *regcache);
 
-static void remote_open (char *name, int from_tty);
-
-static void extended_remote_open (char *name, int from_tty);
-
-static void remote_open_1 (char *, int, struct target_ops *, int extended_p);
+static void remote_open_1 (const char *, int, struct target_ops *,
+			   int extended_p);
 
 static void remote_close (struct target_ops *self);
 
@@ -3619,7 +3614,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
    NAME is the filename used for communication.  */
 
 static void
-remote_open (char *name, int from_tty)
+remote_open (const char *name, int from_tty)
 {
   remote_open_1 (name, from_tty, &remote_ops, 0);
 }
@@ -3628,7 +3623,7 @@ remote_open (char *name, int from_tty)
    remote gdb protocol.  NAME is the filename used for communication.  */
 
 static void
-extended_remote_open (char *name, int from_tty)
+extended_remote_open (const char *name, int from_tty)
 {
   remote_open_1 (name, from_tty, &extended_remote_ops, 1 /*extended_p */);
 }
@@ -4128,7 +4123,7 @@ remote_unpush_target (void)
 }
 
 static void
-remote_open_1 (char *name, int from_tty,
+remote_open_1 (const char *name, int from_tty,
 	       struct target_ops *target, int extended_p)
 {
   struct remote_state *rs = get_remote_state ();
@@ -6828,7 +6823,7 @@ remote_read_bytes (struct target_ops *ops, CORE_ADDR memaddr,
 		   gdb_byte *myaddr, ULONGEST len, ULONGEST *xfered_len)
 {
   if (len == 0)
-    return 0;
+    return TARGET_XFER_EOF;
 
   if (get_traceframe_number () != -1)
     {
@@ -8868,10 +8863,6 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       return TARGET_XFER_E_IO;
     }
 
-  /* Note: a zero OFFSET and LEN can be used to query the minimum
-     buffer size.  */
-  if (offset == 0 && len == 0)
-    return (get_remote_packet_size ());
   /* Minimum outbuf size is get_remote_packet_size ().  If LEN is not
      large enough let the caller deal with it.  */
   if (len < get_remote_packet_size ())

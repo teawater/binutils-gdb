@@ -20,8 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <errno.h>
-#include <string.h>
 #include "target.h"
 #include "target-dcache.h"
 #include "gdbcmd.h"
@@ -34,7 +32,6 @@
 #include "dcache.h"
 #include <signal.h>
 #include "regcache.h"
-#include "gdb_assert.h"
 #include "gdbcore.h"
 #include "exceptions.h"
 #include "target-descriptions.h"
@@ -118,15 +115,12 @@ static struct target_ops debug_target;
 
 static void init_dummy_target (void);
 
-static void debug_to_open (char *, int);
+static void update_current_target (void);
 
-/* Pointer to array of target architecture structures; the size of the
-   array; the current index into the array; the allocated size of the
-   array.  */
-struct target_ops **target_structs;
-unsigned target_struct_size;
-unsigned target_struct_allocsize;
-#define	DEFAULT_ALLOCSIZE	10
+/* Vector of existing target structures. */
+typedef struct target_ops *target_ops_p;
+DEF_VEC_P (target_ops_p);
+static VEC (target_ops_p) *target_structs;
 
 /* The initial current target, so that there is always a semi-valid
    current target.  */
@@ -175,6 +169,13 @@ int may_stop = 1;
 /* Non-zero if we want to see trace of target level stuff.  */
 
 static unsigned int targetdebug = 0;
+
+static void
+set_targetdebug  (char *args, int from_tty, struct cmd_list_element *c)
+{
+  update_current_target ();
+}
+
 static void
 show_targetdebug (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
@@ -345,6 +346,24 @@ complete_target_initialization (struct target_ops *t)
   install_delegators (t);
 }
 
+/* This is used to implement the various target commands.  */
+
+static void
+open_target (char *args, int from_tty, struct cmd_list_element *command)
+{
+  struct target_ops *ops = get_cmd_context (command);
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "-> %s->to_open (...)\n",
+			ops->to_shortname);
+
+  ops->to_open (args, from_tty);
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "<- %s->to_open (%s, %d)\n",
+			ops->to_shortname, args, from_tty);
+}
+
 /* Add possible target architecture T to the list and add a new
    command 'target T->to_shortname'.  Set COMPLETER as the command's
    completer if not NULL.  */
@@ -357,20 +376,7 @@ add_target_with_completer (struct target_ops *t,
 
   complete_target_initialization (t);
 
-  if (!target_structs)
-    {
-      target_struct_allocsize = DEFAULT_ALLOCSIZE;
-      target_structs = (struct target_ops **) xmalloc
-	(target_struct_allocsize * sizeof (*target_structs));
-    }
-  if (target_struct_size >= target_struct_allocsize)
-    {
-      target_struct_allocsize *= 2;
-      target_structs = (struct target_ops **)
-	xrealloc ((char *) target_structs,
-		  target_struct_allocsize * sizeof (*target_structs));
-    }
-  target_structs[target_struct_size++] = t;
+  VEC_safe_push (target_ops_p, target_structs, t);
 
   if (targetlist == NULL)
     add_prefix_cmd ("target", class_run, target_command, _("\
@@ -380,8 +386,9 @@ Remaining arguments are interpreted by the target protocol.  For more\n\
 information on the arguments for a particular protocol, type\n\
 `help target ' followed by the protocol name."),
 		    &targetlist, "target ", 0, &cmdlist);
-  c = add_cmd (t->to_shortname, no_class, t->to_open, t->to_doc,
-	       &targetlist);
+  c = add_cmd (t->to_shortname, no_class, NULL, t->to_doc, &targetlist);
+  set_cmd_sfunc (c, open_target);
+  set_cmd_context (c, t);
   if (completer != NULL)
     set_cmd_completer (c, completer);
 }
@@ -404,7 +411,9 @@ add_deprecated_target_alias (struct target_ops *t, char *alias)
 
   /* If we use add_alias_cmd, here, we do not get the deprecated warning,
      see PR cli/15104.  */
-  c = add_cmd (alias, no_class, t->to_open, t->to_doc, &targetlist);
+  c = add_cmd (alias, no_class, NULL, t->to_doc, &targetlist);
+  set_cmd_sfunc (c, open_target);
+  set_cmd_context (c, t);
   alt = xstrprintf ("target %s", t->to_shortname);
   deprecate_cmd (c, alt);
 }
@@ -671,7 +680,7 @@ pop_all_targets (void)
 int
 target_is_pushed (struct target_ops *t)
 {
-  struct target_ops **cur;
+  struct target_ops *cur;
 
   /* Check magic number.  If wrong, it probably means someone changed
      the struct definition, but not all the places that initialize one.  */
@@ -684,8 +693,8 @@ target_is_pushed (struct target_ops *t)
 		      _("failed internal consistency check"));
     }
 
-  for (cur = &target_stack; (*cur) != NULL; cur = &(*cur)->beneath)
-    if (*cur == t)
+  for (cur = target_stack; cur != NULL; cur = cur->beneath)
+    if (cur == t)
       return 1;
 
   return 0;
@@ -2338,15 +2347,15 @@ find_default_run_target (char *do_mesg)
 
   if (auto_connect_native_target)
     {
-      struct target_ops **t;
+      struct target_ops *t;
       int count = 0;
+      int i;
 
-      for (t = target_structs; t < target_structs + target_struct_size;
-	   ++t)
+      for (i = 0; VEC_iterate (target_ops_p, target_structs, i, t); ++i)
 	{
-	  if ((*t)->to_can_run != delegate_can_run && target_can_run (*t))
+	  if (t->to_can_run != delegate_can_run && target_can_run (t))
 	    {
-	      runable = *t;
+	      runable = t;
 	      ++count;
 	    }
 	}
@@ -2963,13 +2972,6 @@ init_dummy_target (void)
   install_dummy_methods (&dummy_target);
 }
 
-static void
-debug_to_open (char *args, int from_tty)
-{
-  debug_target.to_open (args, from_tty);
-
-  fprintf_unfiltered (gdb_stdlog, "target_open (%s, %d)\n", args, from_tty);
-}
 
 void
 target_close (struct target_ops *targ)
@@ -3415,7 +3417,6 @@ setup_target_debug (void)
 {
   memcpy (&debug_target, &current_target, sizeof debug_target);
 
-  current_target.to_open = debug_to_open;
   init_debug_target (&current_target);
 }
 
@@ -3554,9 +3555,8 @@ initialize_targets (void)
 Set target debugging."), _("\
 Show target debugging."), _("\
 When non-zero, target debugging is enabled.  Higher numbers are more\n\
-verbose.  Changes do not take effect until the next \"run\" or \"target\"\n\
-command."),
-			     NULL,
+verbose."),
+			     set_targetdebug,
 			     show_targetdebug,
 			     &setdebuglist, &showdebuglist);
 

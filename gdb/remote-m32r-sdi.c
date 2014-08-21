@@ -27,7 +27,6 @@
 #include "infrun.h"
 #include "target.h"
 #include "regcache.h"
-#include <string.h>
 #include "gdbthread.h"
 #include <ctype.h>
 #include <signal.h>
@@ -359,7 +358,7 @@ m32r_create_inferior (struct target_ops *ops, char *execfile,
    NAME is the filename used for communication.  */
 
 static void
-m32r_open (char *args, int from_tty)
+m32r_open (const char *args, int from_tty)
 {
   struct hostent *host_ent;
   struct sockaddr_in server_addr;
@@ -1081,7 +1080,7 @@ m32r_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
 	      if (remote_debug)
 		fprintf_unfiltered (gdb_stdlog,
 				    "m32r_xfer_memory() failed\n");
-	      return 0;
+	      return TARGET_XFER_EOF;
 	    }
 	  ret = send_data (writebuf, len);
 	}
@@ -1095,7 +1094,7 @@ m32r_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
 	{
 	  if (remote_debug)
 	    fprintf_unfiltered (gdb_stdlog, "m32r_xfer_memory() failed\n");
-	  return 0;
+	  return TARGET_XFER_EOF;
 	}
 
       c = serial_readchar (sdi_desc, SDI_TIMEOUT);
@@ -1103,7 +1102,7 @@ m32r_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
 	{
 	  if (remote_debug)
 	    fprintf_unfiltered (gdb_stdlog, "m32r_xfer_memory() failed\n");
-	  return 0;
+	  return TARGET_XFER_EOF;
 	}
 
       ret = recv_data (readbuf, len);

@@ -36,7 +36,6 @@
 #include "gdbthread.h"
 #include "target.h"
 #include "language.h"
-#include <string.h>
 #include "gdb-demangle.h"
 #include "filenames.h"
 #include "annotate.h"
@@ -48,7 +47,6 @@
 #include "gdb.h"
 #include "ui-out.h"
 #include "cli/cli-script.h"
-#include "gdb_assert.h"
 #include "block.h"
 #include "solib.h"
 #include "solist.h"
@@ -14788,7 +14786,7 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *,
 
   while (!state.finished)
     {
-      char *p = state.string;
+      const char *p = state.string;
 
       match = 0;
 

@@ -23,10 +23,7 @@
 #define LINUX_BTRACE_H
 
 #include "btrace-common.h"
-#include "config.h"
 #include "vec.h"
-#include "ptid.h"
-#include <stddef.h>
 #include <stdint.h>
 
 #if HAVE_LINUX_PERF_EVENT_H

@@ -24,17 +24,13 @@
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
 #include "gdb_wait.h"
-#include <stdio.h>
 #include <sys/ptrace.h>
 #include "nat/linux-ptrace.h"
 #include "nat/linux-procfs.h"
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
-#include <string.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <errno.h>
 #include <sys/syscall.h>
 #include <sched.h>
 #include <ctype.h>
@@ -5087,7 +5083,7 @@ linux_supports_non_stop (void)
 static int
 linux_async (int enable)
 {
-  int previous = (linux_event_pipe[0] != -1);
+  int previous = target_is_async_p ();
 
   if (debug_threads)
     debug_printf ("linux_async (%d), previous=%d\n",

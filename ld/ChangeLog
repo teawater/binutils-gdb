@@ -1,3 +1,208 @@
+2014-08-20  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* emultempl/armelf.em (OPTION_STUBGROUP_SIZE): Fix formatting.
+	(OPTION_NO_MERGE_EXIDX_ENTRIES, OPTION_LONG_PLT): Likewise.
+
+2014-08-20  Will Newton  <will.newton@linaro.org>
+
+	* configure.tgt: Default armeb-*-eabi* to big endian.
+
+2014-08-20  Daniel Micay  <danielmicay@gmail.com>
+
+	* emultempl/pep.em: Add --high-entropy-va switch.
+	* ld.texinfo: Document the --high-entropy-va switch.
+
+2014-08-20  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/DWARF.sc: Add copyright notice.
+	* scripttempl/aix.sc: Likewise.
+	* scripttempl/alpha.sc: Likewise.
+	* scripttempl/alphavms.sc: Likewise.
+	* scripttempl/aout.sc: Likewise.
+	* scripttempl/armaout.sc: Likewise.
+	* scripttempl/armbpabi.sc: Likewise.
+	* scripttempl/armcoff.sc: Likewise.
+	* scripttempl/avr.sc: Likewise.
+	* scripttempl/avrtiny.sc: Likewise.
+	* scripttempl/crisaout.sc: Likewise.
+	* scripttempl/delta68.sc: Likewise.
+	* scripttempl/dlx.sc: Likewise.
+	* scripttempl/elf.sc: Likewise.
+	* scripttempl/elf32cr16.sc: Likewise.
+	* scripttempl/elf32cr16c.sc: Likewise.
+	* scripttempl/elf32crx.sc: Likewise.
+	* scripttempl/elf32msp430.sc: Likewise.
+	* scripttempl/elf32msp430_3.sc: Likewise.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elf32xc16x.sc: Likewise.
+	* scripttempl/elf32xc16xl.sc: Likewise.
+	* scripttempl/elf32xc16xs.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elf_chaos.sc: Likewise.
+	* scripttempl/elfd10v.sc: Likewise.
+	* scripttempl/elfd30v.sc: Likewise.
+	* scripttempl/elfi370.sc: Likewise.
+	* scripttempl/elfm68hc11.sc: Likewise.
+	* scripttempl/elfm68hc12.sc: Likewise.
+	* scripttempl/elfmicroblaze.sc: Likewise.
+	* scripttempl/elfxgate.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/epiphany_4x4.sc: Likewise.
+	* scripttempl/epocpe.sc: Likewise.
+	* scripttempl/h8300.sc: Likewise.
+	* scripttempl/h8300h.sc: Likewise.
+	* scripttempl/h8300hn.sc: Likewise.
+	* scripttempl/h8300s.sc: Likewise.
+	* scripttempl/h8300sn.sc: Likewise.
+	* scripttempl/h8300sx.sc: Likewise.
+	* scripttempl/h8300sxn.sc: Likewise.
+	* scripttempl/h8500.sc: Likewise.
+	* scripttempl/h8500b.sc: Likewise.
+	* scripttempl/h8500c.sc: Likewise.
+	* scripttempl/h8500m.sc: Likewise.
+	* scripttempl/h8500s.sc: Likewise.
+	* scripttempl/hppaelf.sc: Likewise.
+	* scripttempl/i386beos.sc: Likewise.
+	* scripttempl/i386coff.sc: Likewise.
+	* scripttempl/i386go32.sc: Likewise.
+	* scripttempl/i386msdos.sc: Likewise.
+	* scripttempl/i860coff.sc: Likewise.
+	* scripttempl/i960.sc: Likewise.
+	* scripttempl/ia64vms.sc: Likewise.
+	* scripttempl/ip2k.sc: Likewise.
+	* scripttempl/iq2000.sc: Likewise.
+	* scripttempl/m68kaux.sc: Likewise.
+	* scripttempl/m68kcoff.sc: Likewise.
+	* scripttempl/m88kbcs.sc: Likewise.
+	* scripttempl/mcorepe.sc: Likewise.
+	* scripttempl/mep.sc: Likewise.
+	* scripttempl/mips.sc: Likewise.
+	* scripttempl/mipsbsd.sc: Likewise.
+	* scripttempl/mmo.sc: Likewise.
+	* scripttempl/moxie.sc: Likewise.
+	* scripttempl/nds32elf.sc: Likewise.
+	* scripttempl/nw.sc: Likewise.
+	* scripttempl/pe.sc: Likewise.
+	* scripttempl/pep.sc: Likewise.
+	* scripttempl/pj.sc: Likewise.
+	* scripttempl/ppcpe.sc: Likewise.
+	* scripttempl/psos.sc: Likewise.
+	* scripttempl/riscix.sc: Likewise.
+	* scripttempl/sh.sc: Likewise.
+	* scripttempl/sparccoff.sc: Likewise.
+	* scripttempl/st2000.sc: Likewise.
+	* scripttempl/tic30aout.sc: Likewise.
+	* scripttempl/tic30coff.sc: Likewise.
+	* scripttempl/tic4xcoff.sc: Likewise.
+	* scripttempl/tic54xcoff.sc: Likewise.
+	* scripttempl/tic80coff.sc: Likewise.
+	* scripttempl/v850.sc: Likewise.
+	* scripttempl/v850_rh850.sc: Likewise.
+	* scripttempl/vanilla.sc: Likewise.
+	* scripttempl/w65.sc: Likewise.
+	* scripttempl/xstormy16.sc: Likewise.
+	* scripttempl/z80.sc: Likewise.
+	* scripttempl/z8000.sc: Likewise.
+
+2014-08-19  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (--as-needed): Clarify that references from libraries
+	must be from needed libraries.
+
+2014-08-18  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/aarch64elf.em (gld${EMULATION_NAME}_after_allocation):
+	Handle error status from bfd_elf_discard_info.
+	* emultempl/armelf.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/metagelf.em: Likewise.
+	* emultempl/nios2elf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/tic6xdsbt.em: Likewise.
+	* emultempl/vms.em: Likewise.
+
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	PR 16563
+	* ldlang.c (map_head_is_link_order): Rename from
+	stripped_excluded_sections.
+	(lang_clear_os_map): New function, extracted from..
+	(strip_excluded_output_sections): ..here.
+	* ldlang.h (lang_clear_os_map): Declare.
+	* ldwrite.c (ldwrite): Call lang_clear_os_map.
+	* emultempl/sh64elf.em (sh64_elf_${EMULATION_NAME}_after_allocation):
+	Likewise.
+
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Move AC_PROG_CC and other macros earlier.  Delete
+	plugin checks now done in config/plugins.m4.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2014-08-14  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (is_ir_dummy_bfd): Test BFD_PLUGIN flag rather than
+	flags.claimed.
+
+2014-08-13  Yaakov Selkowitz  <yselkowi@redhat.com>
+
+	* pe-dll.c (autofilter_entry_type autofilter_symbollist_i386): Add
+	__dso_handle.
+
+2014-08-13  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (open_input_bfds): Don't use bfd_elf_get_dyn_lib_class.
+
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.h (struct lang_input_statement_flags): Don't make "reload"
+	field conditional on ENABLE_PLUGINS.
+	* ldlang.c (open_input_bfds): Expand plugin_should_reload.
+	* plugin.h (plugin_should_reload): Delete.
+	* plugin.c (plugin_should_reload): Delete.
+
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
+	* ldmain.c (notice): Update args.
+	* plugin.c (plugin_notice): Likewise.  Follow warning sym link.
+	Handle new indirect symbol.
+
+2014-08-12  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (plugin_load_plugins): Set link_info.lto_plugin_active.
+
+2014-08-08  Ulrich Drepper  <drepper@gmail.com>
+
+	* ldlang.h (struct lang_input_statement_flags): Add pushed
+	member.
+	* ldlex.h (enum option_values): Add OPTION_PUSH_STATE and
+	OPTION_POP_STATE.
+	* lexsup.c (ld_options): Add entries for --push-state and
+	--pop-state.
+	(parse_args): Handle OPTION_PUSH_STATE and OPTION_POP_STATE.
+	* ld.texinfo: Document --push-state and --pop-state.
+
+2014-08-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR14918
+	* plugin.c (plugin_opt_plugin_arg): Drop --pass-through.
+
+2014-08-05  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+
+2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
+
+	* emulparams/elf32bmip.sh: Add .MIPS.abiflags.
+	* emulparams/elf32bmipn32-defs.sh: Likewise.
+	* emulparams/elf64bmip-defs.sh: Likewise.
+
 2014-07-27  Anthony Green  <green@moxielogic.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Add moxiebox support.

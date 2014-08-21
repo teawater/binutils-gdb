@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include <signal.h>
-#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "frame.h"
@@ -43,7 +42,6 @@
 #include "block.h"
 #include "solib.h"
 #include <ctype.h>
-#include "gdb_assert.h"
 #include "observer.h"
 #include "target-descriptions.h"
 #include "user-regs.h"
@@ -1359,7 +1357,9 @@ until_next_command (int from_tty)
 	error (_("Execution is not within a known function."));
 
       tp->control.step_range_start = BMSYMBOL_VALUE_ADDRESS (msymbol);
-      tp->control.step_range_end = pc;
+      /* The upper-bound of step_range is exclusive.  In order to make PC
+	 within the range, set the step_range_end with PC + 1.  */
+      tp->control.step_range_end = pc + 1;
     }
   else
     {
