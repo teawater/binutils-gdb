@@ -813,28 +813,6 @@ debug_terminal_ours (struct target_ops *self)
 }
 
 static void
-delegate_terminal_save_ours (struct target_ops *self)
-{
-  self = self->beneath;
-  self->to_terminal_save_ours (self);
-}
-
-static void
-tdefault_terminal_save_ours (struct target_ops *self)
-{
-}
-
-static void
-debug_terminal_save_ours (struct target_ops *self)
-{
-  fprintf_unfiltered (gdb_stdlog, "-> %s->to_terminal_save_ours (...)\n", debug_target.to_shortname);
-  debug_target.to_terminal_save_ours (&debug_target);
-  fprintf_unfiltered (gdb_stdlog, "<- %s->to_terminal_save_ours (", debug_target.to_shortname);
-  target_debug_print_struct_target_ops_p (&debug_target);
-  fputs_unfiltered (")\n", gdb_stdlog);
-}
-
-static void
 delegate_terminal_info (struct target_ops *self, const char *arg1, int arg2)
 {
   self = self->beneath;
@@ -1324,23 +1302,23 @@ debug_thread_alive (struct target_ops *self, ptid_t arg1)
 }
 
 static void
-delegate_find_new_threads (struct target_ops *self)
+delegate_update_thread_list (struct target_ops *self)
 {
   self = self->beneath;
-  self->to_find_new_threads (self);
+  self->to_update_thread_list (self);
 }
 
 static void
-tdefault_find_new_threads (struct target_ops *self)
+tdefault_update_thread_list (struct target_ops *self)
 {
 }
 
 static void
-debug_find_new_threads (struct target_ops *self)
+debug_update_thread_list (struct target_ops *self)
 {
-  fprintf_unfiltered (gdb_stdlog, "-> %s->to_find_new_threads (...)\n", debug_target.to_shortname);
-  debug_target.to_find_new_threads (&debug_target);
-  fprintf_unfiltered (gdb_stdlog, "<- %s->to_find_new_threads (", debug_target.to_shortname);
+  fprintf_unfiltered (gdb_stdlog, "-> %s->to_update_thread_list (...)\n", debug_target.to_shortname);
+  debug_target.to_update_thread_list (&debug_target);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->to_update_thread_list (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
@@ -3814,8 +3792,6 @@ install_delegators (struct target_ops *ops)
     ops->to_terminal_ours_for_output = delegate_terminal_ours_for_output;
   if (ops->to_terminal_ours == NULL)
     ops->to_terminal_ours = delegate_terminal_ours;
-  if (ops->to_terminal_save_ours == NULL)
-    ops->to_terminal_save_ours = delegate_terminal_save_ours;
   if (ops->to_terminal_info == NULL)
     ops->to_terminal_info = delegate_terminal_info;
   if (ops->to_kill == NULL)
@@ -3852,8 +3828,8 @@ install_delegators (struct target_ops *ops)
     ops->to_program_signals = delegate_program_signals;
   if (ops->to_thread_alive == NULL)
     ops->to_thread_alive = delegate_thread_alive;
-  if (ops->to_find_new_threads == NULL)
-    ops->to_find_new_threads = delegate_find_new_threads;
+  if (ops->to_update_thread_list == NULL)
+    ops->to_update_thread_list = delegate_update_thread_list;
   if (ops->to_pid_to_str == NULL)
     ops->to_pid_to_str = delegate_pid_to_str;
   if (ops->to_extra_thread_info == NULL)
@@ -4068,7 +4044,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_terminal_inferior = tdefault_terminal_inferior;
   ops->to_terminal_ours_for_output = tdefault_terminal_ours_for_output;
   ops->to_terminal_ours = tdefault_terminal_ours;
-  ops->to_terminal_save_ours = tdefault_terminal_save_ours;
   ops->to_terminal_info = default_terminal_info;
   ops->to_kill = tdefault_kill;
   ops->to_load = tdefault_load;
@@ -4087,7 +4062,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_pass_signals = tdefault_pass_signals;
   ops->to_program_signals = tdefault_program_signals;
   ops->to_thread_alive = tdefault_thread_alive;
-  ops->to_find_new_threads = tdefault_find_new_threads;
+  ops->to_update_thread_list = tdefault_update_thread_list;
   ops->to_pid_to_str = default_pid_to_str;
   ops->to_extra_thread_info = tdefault_extra_thread_info;
   ops->to_thread_name = tdefault_thread_name;
@@ -4212,7 +4187,6 @@ init_debug_target (struct target_ops *ops)
   ops->to_terminal_inferior = debug_terminal_inferior;
   ops->to_terminal_ours_for_output = debug_terminal_ours_for_output;
   ops->to_terminal_ours = debug_terminal_ours;
-  ops->to_terminal_save_ours = debug_terminal_save_ours;
   ops->to_terminal_info = debug_terminal_info;
   ops->to_kill = debug_kill;
   ops->to_load = debug_load;
@@ -4231,7 +4205,7 @@ init_debug_target (struct target_ops *ops)
   ops->to_pass_signals = debug_pass_signals;
   ops->to_program_signals = debug_program_signals;
   ops->to_thread_alive = debug_thread_alive;
-  ops->to_find_new_threads = debug_find_new_threads;
+  ops->to_update_thread_list = debug_update_thread_list;
   ops->to_pid_to_str = debug_pid_to_str;
   ops->to_extra_thread_info = debug_extra_thread_info;
   ops->to_thread_name = debug_thread_name;

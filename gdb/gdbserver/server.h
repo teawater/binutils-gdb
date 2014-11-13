@@ -29,8 +29,6 @@ gdb_static_assert (sizeof (CORE_ADDR) >= sizeof (void *));
 
 #include "version.h"
 
-#include <setjmp.h>
-
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
@@ -84,12 +82,9 @@ extern ptid_t cont_thread;
 extern ptid_t general_thread;
 
 extern int server_waiting;
-extern int debug_hw_points;
 extern int pass_signals[];
 extern int program_signals[];
 extern int program_signals_p;
-
-extern jmp_buf toplevel;
 
 extern int disable_packet_vCont;
 extern int disable_packet_Tthread;

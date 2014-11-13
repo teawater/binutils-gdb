@@ -928,12 +928,7 @@ handle_COMDAT (bfd * abfd,
 
       bfd_coff_swap_sym_in (abfd, esym, & isym);
 
-      if (sizeof (internal_s->s_name) > SYMNMLEN)
-	{
-	  /* This case implies that the matching
-	     symbol name will be in the string table.  */
-	  abort ();
-	}
+      BFD_ASSERT (sizeof (internal_s->s_name) <= SYMNMLEN);
 
       if (isym.n_scnum == section->target_index)
 	{
@@ -964,8 +959,12 @@ handle_COMDAT (bfd * abfd,
 	  /* All 3 branches use this.  */
 	  symname = _bfd_coff_internal_syment_name (abfd, &isym, buf);
 
+	  /* PR 17512 file: 078-11867-0.004  */ 
 	  if (symname == NULL)
-	    abort ();
+	    {
+	      _bfd_error_handler (_("%B: unable to load COMDAT section name"), abfd);
+	      break;
+	    }
 
 	  switch (seen_state)
 	    {
@@ -3134,7 +3133,8 @@ coff_compute_section_file_positions (bfd * abfd)
 #ifdef COFF_IMAGE_WITH_PE
   int page_size;
 
-  if (coff_data (abfd)->link_info)
+  if (coff_data (abfd)->link_info
+      || (pe_data (abfd) && pe_data (abfd)->pe_opthdr.FileAlignment))
     {
       page_size = pe_data (abfd)->pe_opthdr.FileAlignment;
 
@@ -4032,8 +4032,6 @@ coff_write_object_contents (bfd * abfd)
     internal_f.f_flags |= F_DYNLOAD;
 #endif
 
-  memset (&internal_a, 0, sizeof internal_a);
-
   /* Set up architecture-dependent stuff.  */
   {
     unsigned int magic = 0;
@@ -4455,11 +4453,11 @@ buy_and_read (bfd *abfd, file_ptr where, bfd_size_type size)
   void * area = bfd_alloc (abfd, size);
 
   if (!area)
-    return (NULL);
+    return NULL;
   if (bfd_seek (abfd, where, SEEK_SET) != 0
       || bfd_bread (area, size, abfd) != size)
-    return (NULL);
-  return (area);
+    return NULL;
+  return area;
 }
 
 /*
@@ -4493,6 +4491,8 @@ coff_sort_func_alent (const void * arg1, const void * arg2)
   const coff_symbol_type *s1 = (const coff_symbol_type *) (al1->u.sym);
   const coff_symbol_type *s2 = (const coff_symbol_type *) (al2->u.sym);
 
+  if (s1 == NULL || s2 == NULL)
+    return 0;
   if (s1->symbol.value < s2->symbol.value)
     return -1;
   else if (s1->symbol.value > s2->symbol.value)
@@ -4510,9 +4510,10 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   unsigned int counter;
   alent *cache_ptr;
   bfd_vma prev_offset = 0;
-  int ordered = 1;
+  bfd_boolean ordered = TRUE;
   unsigned int nbr_func;
   LINENO *src;
+  bfd_boolean have_func;
 
   BFD_ASSERT (asect->lineno == NULL);
 
@@ -4535,31 +4536,33 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   asect->lineno = lineno_cache;
   src = native_lineno;
   nbr_func = 0;
+  have_func = FALSE;
 
-  for (counter = 0; counter < asect->lineno_count; counter++)
+  for (counter = 0; counter < asect->lineno_count; counter++, src++)
     {
       struct internal_lineno dst;
 
       bfd_coff_swap_lineno_in (abfd, src, &dst);
       cache_ptr->line_number = dst.l_lnno;
+      /* Appease memory checkers that get all excited about
+	 uninitialised memory when copying alents if u.offset is
+	 larger than u.sym.  (64-bit BFD on 32-bit host.)  */
+      memset (&cache_ptr->u, 0, sizeof (cache_ptr->u));
 
       if (cache_ptr->line_number == 0)
 	{
-	  bfd_boolean warned;
-	  bfd_signed_vma symndx;
+	  bfd_vma symndx;
 	  coff_symbol_type *sym;
 
-	  nbr_func++;
-	  warned = FALSE;
+	  have_func = FALSE;
 	  symndx = dst.l_addr.l_symndx;
-	  if (symndx < 0
-	      || (bfd_vma) symndx >= obj_raw_syment_count (abfd))
+	  if (symndx >= obj_raw_syment_count (abfd))
 	    {
 	      (*_bfd_error_handler)
-		(_("%B: warning: illegal symbol index %ld in line numbers"),
-		 abfd, (long) symndx);
-	      symndx = 0;
-	      warned = TRUE;
+		(_("%B: warning: illegal symbol index 0x%lx in line number entry %d"),
+		 abfd, (long) symndx, counter);
+	      cache_ptr->line_number = -1;
+	      continue;
 	    }
 
 	  /* FIXME: We should not be casting between ints and
@@ -4567,25 +4570,43 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	  sym = ((coff_symbol_type *)
 		 ((symndx + obj_raw_syments (abfd))
 		  ->u.syment._n._n_n._n_zeroes));
+
+	  /* PR 17512 file: 078-10659-0.004  */
+	  if (sym < obj_symbols (abfd)
+	      || sym >= obj_symbols (abfd) + bfd_get_symcount (abfd))
+	    {
+	      (*_bfd_error_handler)
+		(_("%B: warning: illegal symbol in line number entry %d"),
+		 abfd, counter);
+	      cache_ptr->line_number = -1;
+	      continue;
+	    }
+
+	  have_func = TRUE;
+	  nbr_func++;
 	  cache_ptr->u.sym = (asymbol *) sym;
-	  if (sym->lineno != NULL && ! warned)
+	  if (sym->lineno != NULL)
 	    (*_bfd_error_handler)
 	      (_("%B: warning: duplicate line number information for `%s'"),
 	       abfd, bfd_asymbol_name (&sym->symbol));
 
 	  sym->lineno = cache_ptr;
 	  if (sym->symbol.value < prev_offset)
-	    ordered = 0;
+	    ordered = FALSE;
 	  prev_offset = sym->symbol.value;
 	}
+      else if (!have_func)
+	/* Drop line information that has no associated function.
+	   PR 17521: file: 078-10659-0.004.  */
+	continue;
       else
-	cache_ptr->u.offset = dst.l_addr.l_paddr
-	  - bfd_section_vma (abfd, asect);
-
+	cache_ptr->u.offset = (dst.l_addr.l_paddr
+			       - bfd_section_vma (abfd, asect));
       cache_ptr++;
-      src++;
     }
-  cache_ptr->line_number = 0;
+
+  asect->lineno_count = cache_ptr - lineno_cache;
+  memset (cache_ptr, 0, sizeof (*cache_ptr));
   bfd_release (abfd, native_lineno);
 
   /* On some systems (eg AIX5.3) the lineno table may not be sorted.  */
@@ -4602,15 +4623,17 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	  alent **p = func_table;
 	  unsigned int i;
 
-	  for (i = 0; i < counter; i++)
+	  for (i = 0; i < asect->lineno_count; i++)
 	    if (lineno_cache[i].line_number == 0)
 	      *p++ = &lineno_cache[i];
 
+	  BFD_ASSERT ((p - func_table) == nbr_func);
+	  
 	  /* Sort by functions.  */
 	  qsort (func_table, nbr_func, sizeof (alent *), coff_sort_func_alent);
 
 	  /* Create the new sorted table.  */
-	  amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
+	  amt = (bfd_size_type) asect->lineno_count * sizeof (alent);
 	  n_lineno_cache = (alent *) bfd_alloc (abfd, amt);
 	  if (n_lineno_cache != NULL)
 	    {
@@ -4621,18 +4644,18 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 		  coff_symbol_type *sym;
 		  alent *old_ptr = func_table[i];
 
-		  /* Copy the function entry and update it.  */
-		  *n_cache_ptr = *old_ptr;
-		  sym = (coff_symbol_type *)n_cache_ptr->u.sym;
-		  sym->lineno = n_cache_ptr;
-		  n_cache_ptr++;
-		  old_ptr++;
-
-		  /* Copy the line number entries.  */
-		  while (old_ptr->line_number != 0)
+		  /* Update the function entry.  */
+		  sym = (coff_symbol_type *) old_ptr->u.sym;
+		  /* PR binutils/17512: Point the lineno to where
+		     this entry will be after the memcpy below.  */
+		  sym->lineno = lineno_cache + (n_cache_ptr - n_lineno_cache);
+		  /* Copy the function and line number entries.  */
+		  do
 		    *n_cache_ptr++ = *old_ptr++;
+		  while (old_ptr->line_number != 0);
 		}
-	      n_cache_ptr->line_number = 0;
+	      BFD_ASSERT ((bfd_size_type) (n_cache_ptr - n_lineno_cache) == (amt / sizeof (alent)));
+
 	      memcpy (lineno_cache, n_lineno_cache, amt);
 	    }
 	  bfd_release (abfd, func_table);
@@ -4671,7 +4694,7 @@ coff_slurp_symbol_table (bfd * abfd)
 
   amt = obj_raw_syment_count (abfd);
   amt *= sizeof (unsigned int);
-  table_ptr = (unsigned int *) bfd_alloc (abfd, amt);
+  table_ptr = (unsigned int *) bfd_zalloc (abfd, amt);
 
   if (table_ptr == NULL)
     return FALSE;
@@ -4685,14 +4708,16 @@ coff_slurp_symbol_table (bfd * abfd)
 	{
 	  combined_entry_type *src = native_symbols + this_index;
 	  table_ptr[this_index] = number_of_symbols;
-	  dst->symbol.the_bfd = abfd;
 
+	  dst->symbol.the_bfd = abfd;
 	  dst->symbol.name = (char *) (src->u.syment._n._n_n._n_offset);
 	  /* We use the native name field to point to the cached field.  */
 	  src->u.syment._n._n_n._n_zeroes = (bfd_hostptr_t) dst;
 	  dst->symbol.section = coff_section_from_bfd_index (abfd,
 						     src->u.syment.n_scnum);
 	  dst->symbol.flags = 0;
+	  /* PR 17512: file: 079-7098-0.001:0.1.  */
+	  dst->symbol.value = 0;
 	  dst->done_lineno = FALSE;
 
 	  switch (src->u.syment.n_sclass)
@@ -5064,13 +5089,13 @@ coff_classify_symbol (bfd *abfd,
       if (syment->n_value == 0)
 	{
 	  asection *sec;
-	  char buf[SYMNMLEN + 1];
-
-	  sec = coff_section_from_bfd_index (abfd, syment->n_scnum);
-	  if (sec != NULL
-	      && (strcmp (bfd_get_section_name (abfd, sec),
-			  _bfd_coff_internal_syment_name (abfd, syment, buf))
-		  == 0))
+	  char * name;
+ 	  char buf[SYMNMLEN + 1];
+ 
+	  name = _bfd_coff_internal_syment_name (abfd, syment, buf)
+ 	  sec = coff_section_from_bfd_index (abfd, syment->n_scnum);
+	  if (sec != NULL && name != NULL
+	      && (strcmp (bfd_get_section_name (abfd, sec), name) == 0))
 	    return COFF_SYMBOL_PE_SECTION;
 	}
 #endif

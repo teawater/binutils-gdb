@@ -26,7 +26,6 @@
 #include "inferior.h"
 #include "infrun.h"
 #include "target.h"
-#include "exceptions.h"
 #include "gdbcore.h"
 #include "command.h"
 #include "completer.h"
@@ -63,7 +62,7 @@
 
 #include "windows-tdep.h"
 #include "windows-nat.h"
-#include "i386-nat.h"
+#include "x86-nat.h"
 #include "complaints.h"
 #include "inf-child.h"
 
@@ -1742,7 +1741,7 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
      current thread until we report an event out of windows_wait.  */
   inferior_ptid = pid_to_ptid (pid);
 
-  child_terminal_init_with_pgrp (pid);
+  target_terminal_init ();
   target_terminal_inferior ();
 
   windows_initialization_done = 0;
@@ -1910,7 +1909,7 @@ windows_detach (struct target_ops *ops, const char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
-  i386_cleanup_dregs ();
+  x86_cleanup_dregs ();
   inferior_ptid = null_ptid;
   detach_inferior (current_event.dwProcessId);
 
@@ -2361,7 +2360,7 @@ static void
 windows_mourn_inferior (struct target_ops *ops)
 {
   (void) windows_continue (DBG_CONTINUE, -1, 0);
-  i386_cleanup_dregs();
+  x86_cleanup_dregs();
   if (open_process_used)
     {
       CHECK (CloseHandle (current_process_handle));
@@ -2593,16 +2592,16 @@ _initialize_windows_nat (void)
 
   t = windows_target ();
 
-  i386_use_watchpoints (t);
+  x86_use_watchpoints (t);
 
-  i386_dr_low.set_control = cygwin_set_dr7;
-  i386_dr_low.set_addr = cygwin_set_dr;
-  i386_dr_low.get_addr = cygwin_get_dr;
-  i386_dr_low.get_status = cygwin_get_dr6;
-  i386_dr_low.get_control = cygwin_get_dr7;
+  x86_dr_low.set_control = cygwin_set_dr7;
+  x86_dr_low.set_addr = cygwin_set_dr;
+  x86_dr_low.get_addr = cygwin_get_dr;
+  x86_dr_low.get_status = cygwin_get_dr6;
+  x86_dr_low.get_control = cygwin_get_dr7;
 
-  /* i386_dr_low.debug_register_length field is set by
-     calling i386_set_debug_register_length function
+  /* x86_dr_low.debug_register_length field is set by
+     calling x86_set_debug_register_length function
      in processor windows specific native file.  */
 
   add_target (t);

@@ -25,7 +25,6 @@
 #include "regcache.h"
 #include "reggroups.h"
 #include "observer.h"
-#include "exceptions.h"
 #include "remote.h"
 #include "valprint.h"
 #include "regset.h"
@@ -536,6 +535,13 @@ get_current_regcache (void)
   return get_thread_regcache (inferior_ptid);
 }
 
+/* See common/common-regcache.h.  */
+
+struct regcache *
+get_thread_regcache_for_ptid (ptid_t ptid)
+{
+  return get_thread_regcache (ptid);
+}
 
 /* Observer for the target_changed event.  */
 

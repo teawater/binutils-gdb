@@ -179,15 +179,18 @@ DESCRIPTION
 .#define bfd_mach_mips_octeon		6501
 .#define bfd_mach_mips_octeonp		6601
 .#define bfd_mach_mips_octeon2		6502
+.#define bfd_mach_mips_octeon3          6503
 .#define bfd_mach_mips_xlr              887682   {* decimal 'XLR'  *}
 .#define bfd_mach_mipsisa32             32
 .#define bfd_mach_mipsisa32r2           33
 .#define bfd_mach_mipsisa32r3           34
 .#define bfd_mach_mipsisa32r5           36
+.#define bfd_mach_mipsisa32r6           37
 .#define bfd_mach_mipsisa64             64
 .#define bfd_mach_mipsisa64r2           65
 .#define bfd_mach_mipsisa64r3           66
 .#define bfd_mach_mipsisa64r5           68
+.#define bfd_mach_mipsisa64r6           69
 .#define bfd_mach_mips_micromips        96
 .  bfd_arch_i386,      {* Intel 386 *}
 .#define bfd_mach_i386_intel_syntax	(1 << 0)

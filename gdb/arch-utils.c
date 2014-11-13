@@ -243,6 +243,14 @@ default_remote_register_number (struct gdbarch *gdbarch,
   return regno;
 }
 
+/* See arch-utils.h.  */
+
+int
+default_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range)
+{
+  return 0;
+}
+
 
 /* Functions to manipulate the endianness of the target.  */
 
@@ -818,7 +826,18 @@ int default_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr)
   return 0;
 }
 
-/* */
+void
+default_skip_permanent_breakpoint (struct regcache *regcache)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  CORE_ADDR current_pc = regcache_read_pc (regcache);
+  const gdb_byte *bp_insn;
+  int bp_len;
+
+  bp_insn = gdbarch_breakpoint_from_pc (gdbarch, &current_pc, &bp_len);
+  current_pc += bp_len;
+  regcache_write_pc (regcache, current_pc);
+}
 
 /* -Wmissing-prototypes */
 extern initialize_file_ftype _initialize_gdbarch_utils;

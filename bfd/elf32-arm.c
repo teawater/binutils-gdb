@@ -2283,6 +2283,8 @@ static const bfd_vma elf32_arm_nacl_plt_entry [] =
 #define THM_MAX_BWD_BRANCH_OFFSET  (-(1 << 22) + 4)
 #define THM2_MAX_FWD_BRANCH_OFFSET (((1 << 24) - 2) + 4)
 #define THM2_MAX_BWD_BRANCH_OFFSET (-(1 << 24) + 4)
+#define THM2_MAX_FWD_COND_BRANCH_OFFSET (((1 << 20) -2) + 4)
+#define THM2_MAX_BWD_COND_BRANCH_OFFSET (-(1 << 20) + 4)
 
 enum stub_insn_type
 {
@@ -3667,7 +3669,8 @@ arm_type_of_stub (struct bfd_link_info *info,
 
   /* ST_BRANCH_TO_ARM is nonsense to thumb-only targets when we
      are considering a function call relocation.  */
-  if (thumb_only && (r_type == R_ARM_THM_CALL || r_type == R_ARM_THM_JUMP24)
+  if (thumb_only && (r_type == R_ARM_THM_CALL || r_type == R_ARM_THM_JUMP24
+                     || r_type == R_ARM_THM_JUMP19)
       && branch_type == ST_BRANCH_TO_ARM)
     branch_type = ST_BRANCH_TO_THUMB;
 
@@ -3711,7 +3714,7 @@ arm_type_of_stub (struct bfd_link_info *info,
   branch_offset = (bfd_signed_vma)(destination - location);
 
   if (r_type == R_ARM_THM_CALL || r_type == R_ARM_THM_JUMP24
-      || r_type == R_ARM_THM_TLS_CALL)
+      || r_type == R_ARM_THM_TLS_CALL || r_type == R_ARM_THM_JUMP19)
     {
       /* Handle cases where:
 	 - this call goes too far (different Thumb/Thumb2 max
@@ -3727,10 +3730,15 @@ arm_type_of_stub (struct bfd_link_info *info,
 	  || (thumb2
 	      && (branch_offset > THM2_MAX_FWD_BRANCH_OFFSET
 		  || (branch_offset < THM2_MAX_BWD_BRANCH_OFFSET)))
+	  || (thumb2
+	      && (branch_offset > THM2_MAX_FWD_COND_BRANCH_OFFSET
+		  || (branch_offset < THM2_MAX_BWD_COND_BRANCH_OFFSET))
+	      && (r_type == R_ARM_THM_JUMP19))
 	  || (branch_type == ST_BRANCH_TO_ARM
 	      && (((r_type == R_ARM_THM_CALL
 		    || r_type == R_ARM_THM_TLS_CALL) && !globals->use_blx)
-		  || (r_type == R_ARM_THM_JUMP24))
+		  || (r_type == R_ARM_THM_JUMP24)
+                  || (r_type == R_ARM_THM_JUMP19))
 	      && !use_plt))
 	{
 	  if (branch_type == ST_BRANCH_TO_THUMB)
@@ -5347,7 +5355,8 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		      /* For historical reasons, use the existing names for
 			 ARM-to-Thumb and Thumb-to-ARM stubs.  */
 		      if ((r_type == (unsigned int) R_ARM_THM_CALL
-			   || r_type == (unsigned int) R_ARM_THM_JUMP24)
+			   || r_type == (unsigned int) R_ARM_THM_JUMP24
+                           || r_type == (unsigned int) R_ARM_THM_JUMP19)
 			  && branch_type == ST_BRANCH_TO_ARM)
 			sprintf (stub_entry->output_name,
 				 THUMB2ARM_GLUE_ENTRY_NAME, sym_name);
@@ -9125,6 +9134,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_signed_vma reloc_signed_max = 0xffffe;
 	bfd_signed_vma reloc_signed_min = -0x100000;
 	bfd_signed_vma signed_check;
+        enum elf32_arm_stub_type stub_type = arm_stub_none;
+	struct elf32_arm_stub_hash_entry *stub_entry;
+	struct elf32_arm_link_hash_entry *hash;
 
 	/* Need to refetch the addend, reconstruct the top three bits,
 	   and squish the two 11 bit pieces together.  */
@@ -9156,8 +9168,25 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    *unresolved_reloc_p = FALSE;
 	  }
 
-	/* ??? Should handle interworking?  GCC might someday try to
-	   use this for tail calls.  */
+	hash = (struct elf32_arm_link_hash_entry *)h;
+
+	stub_type = arm_type_of_stub (info, input_section, rel,
+		                      st_type, &branch_type,
+		                      hash, value, sym_sec,
+		                      input_bfd, sym_name);
+	if (stub_type != arm_stub_none)
+	  {
+	    stub_entry = elf32_arm_get_stub_entry (input_section,
+				                   sym_sec, h,
+				                   rel, globals,
+				                   stub_type);
+	    if (stub_entry != NULL)
+	      {
+	        value = (stub_entry->stub_offset
+                        + stub_entry->stub_sec->output_offset
+                        + stub_entry->stub_sec->output_section->vma);
+	      }
+	  }
 
 	relocation = value + signed_addend;
 	relocation -= (input_section->output_section->vma
@@ -11749,7 +11778,9 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	  {
 	    int secondary_compat = -1, secondary_compat_out = -1;
 	    unsigned int saved_out_attr = out_attr[i].i;
-	    static const char *name_table[] = {
+	    int arch_attr;
+	    static const char *name_table[] =
+	      {
 		/* These aren't real CPU names, but we can't guess
 		   that from the architecture version alone.  */
 		"Pre v4",
@@ -11771,10 +11802,17 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	    /* Merge Tag_CPU_arch and Tag_also_compatible_with.  */
 	    secondary_compat = get_secondary_compatible_arch (ibfd);
 	    secondary_compat_out = get_secondary_compatible_arch (obfd);
-	    out_attr[i].i = tag_cpu_arch_combine (ibfd, out_attr[i].i,
-						  &secondary_compat_out,
-						  in_attr[i].i,
-						  secondary_compat);
+	    arch_attr = tag_cpu_arch_combine (ibfd, out_attr[i].i,
+					      &secondary_compat_out,
+					      in_attr[i].i,
+					      secondary_compat);
+
+	    /* Return with error if failed to merge.  */
+	    if (arch_attr == -1)
+	      return FALSE;
+
+	    out_attr[i].i = arch_attr;
+
 	    set_secondary_compatible_arch (obfd, secondary_compat_out);
 
 	    /* Merge Tag_CPU_name and Tag_CPU_raw_name.  */
@@ -13045,8 +13083,8 @@ elf32_arm_is_target_special_symbol (bfd * abfd ATTRIBUTE_UNUSED, asymbol * sym)
 
 static bfd_boolean
 arm_elf_find_function (bfd *         abfd ATTRIBUTE_UNUSED,
-		       asection *    section,
 		       asymbol **    symbols,
+		       asection *    section,
 		       bfd_vma       offset,
 		       const char ** filename_ptr,
 		       const char ** functionname_ptr)
@@ -13107,30 +13145,32 @@ arm_elf_find_function (bfd *         abfd ATTRIBUTE_UNUSED,
 
 static bfd_boolean
 elf32_arm_find_nearest_line (bfd *          abfd,
-			     asection *     section,
 			     asymbol **     symbols,
+			     asection *     section,
 			     bfd_vma        offset,
 			     const char **  filename_ptr,
 			     const char **  functionname_ptr,
-			     unsigned int * line_ptr)
+			     unsigned int * line_ptr,
+			     unsigned int * discriminator_ptr)
 {
   bfd_boolean found = FALSE;
 
-  /* We skip _bfd_dwarf1_find_nearest_line since no known ARM toolchain uses it.  */
-
-  if (_bfd_dwarf2_find_nearest_line (abfd, dwarf_debug_sections,
-				     section, symbols, offset,
+  if (_bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section, offset,
 				     filename_ptr, functionname_ptr,
-				     line_ptr, NULL, 0,
+				     line_ptr, discriminator_ptr,
+				     dwarf_debug_sections, 0,
 				     & elf_tdata (abfd)->dwarf2_find_line_info))
     {
       if (!*functionname_ptr)
-	arm_elf_find_function (abfd, section, symbols, offset,
+	arm_elf_find_function (abfd, symbols, section, offset,
 			       *filename_ptr ? NULL : filename_ptr,
 			       functionname_ptr);
 
       return TRUE;
     }
+
+  /* Skip _bfd_dwarf1_find_nearest_line since no known ARM toolchain
+     uses DWARF1.  */
 
   if (! _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset,
 					     & found, filename_ptr,
@@ -13144,7 +13184,7 @@ elf32_arm_find_nearest_line (bfd *          abfd,
   if (symbols == NULL)
     return FALSE;
 
-  if (! arm_elf_find_function (abfd, section, symbols, offset,
+  if (! arm_elf_find_function (abfd, symbols, section, offset,
 			       filename_ptr, functionname_ptr))
     return FALSE;
 
@@ -15868,9 +15908,10 @@ elf32_arm_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 			   Elf_Internal_Sym *sym, const char **namep,
 			   flagword *flagsp, asection **secp, bfd_vma *valp)
 {
-  if ((abfd->flags & DYNAMIC) == 0
-      && (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-	  || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE))
+  if ((ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
+       || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE)
+      && (abfd->flags & DYNAMIC) == 0
+      && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
     elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
 
   if (elf32_arm_hash_table (info) == NULL)
@@ -15915,6 +15956,26 @@ const struct elf_size_info elf32_arm_size_info =
   bfd_elf32_swap_reloca_out
 };
 
+static bfd_vma
+read_code32 (const bfd *abfd, const bfd_byte *addr)
+{
+  /* V7 BE8 code is always little endian.  */
+  if ((elf_elfheader (abfd)->e_flags & EF_ARM_BE8) != 0)
+    return bfd_getl32 (addr);
+
+  return bfd_get_32 (abfd, addr);
+}
+
+static bfd_vma
+read_code16 (const bfd *abfd, const bfd_byte *addr)
+{
+  /* V7 BE8 code is always little endian.  */
+  if ((elf_elfheader (abfd)->e_flags & EF_ARM_BE8) != 0)
+    return bfd_getl16 (addr);
+
+  return bfd_get_16 (abfd, addr);
+}
+
 /* Return size of plt0 entry starting at ADDR
    or (bfd_vma) -1 if size can not be determined.  */
 
@@ -15924,7 +15985,7 @@ elf32_arm_plt0_size (const bfd *abfd, const bfd_byte *addr)
   bfd_vma first_word;
   bfd_vma plt0_size;
 
-  first_word = H_GET_32 (abfd, addr);
+  first_word = read_code32 (abfd, addr);
 
   if (first_word == elf32_arm_plt0_entry[0])
     plt0_size = 4 * ARRAY_SIZE (elf32_arm_plt0_entry);
@@ -15949,17 +16010,17 @@ elf32_arm_plt_size (const bfd *abfd, const bfd_byte *start, bfd_vma offset)
   const bfd_byte *addr = start + offset;
 
   /* PLT entry size if fixed on Thumb-only platforms.  */
-  if (H_GET_32(abfd, start) == elf32_thumb2_plt0_entry[0])
+  if (read_code32 (abfd, start) == elf32_thumb2_plt0_entry[0])
       return 4 * ARRAY_SIZE (elf32_thumb2_plt_entry);
 
   /* Respect Thumb stub if necessary.  */
-  if (H_GET_16(abfd, addr) == elf32_arm_plt_thumb_stub[0])
+  if (read_code16 (abfd, addr) == elf32_arm_plt_thumb_stub[0])
     {
       plt_size += 2 * ARRAY_SIZE(elf32_arm_plt_thumb_stub);
     }
 
   /* Strip immediate from first add.  */
-  first_insn = H_GET_32(abfd, addr + plt_size) & 0xffffff00;
+  first_insn = read_code32 (abfd, addr + plt_size) & 0xffffff00;
 
 #ifdef FOUR_WORD_PLT
   if (first_insn == elf32_arm_plt_entry[0])
