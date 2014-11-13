@@ -128,10 +128,11 @@ WARN_CFLAGS_NO_FORMAT = `echo " $(WARN_CFLAGS) " \
 # CFLAGS is specifically reserved for setting from the command line
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = @CFLAGS@
+CPPFLAGS = @CPPFLAGS@
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS_BASE =  ${CFLAGS} ${GLOBAL_CFLAGS} \
-	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS}
+	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS} ${CPPFLAGS}
 INTERNAL_WARN_CFLAGS =  ${INTERNAL_CFLAGS_BASE} $(WARN_CFLAGS)
 INTERNAL_CFLAGS =  ${INTERNAL_WARN_CFLAGS} $(WERROR_CFLAGS) -DGDBSERVER
 
@@ -149,7 +150,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/thread-db.c $(srcdir)/utils.c $(srcdir)/debug.c \
 	$(srcdir)/linux-arm-low.c $(srcdir)/linux-bfin-low.c \
 	$(srcdir)/linux-cris-low.c $(srcdir)/linux-crisv32-low.c \
-	${srcdir}/i386-low.c $(srcdir)/i387-fp.c \
+	${srcdir}/x86-low.c $(srcdir)/i387-fp.c \
 	$(srcdir)/linux-ia64-low.c $(srcdir)/linux-low.c \
 	$(srcdir)/linux-m32r-low.c \
 	$(srcdir)/linux-m68k-low.c $(srcdir)/linux-mips-low.c \
@@ -170,7 +171,8 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/filestuff.c $(srcdir)/target/waitstatus.c \
 	$(srcdir)/nat/mips-linux-watch.c $(srcdir)/common/print-utils.c \
 	$(srcdir)/common/rsp-low.c $(srcdir)/common/errors.c \
-	$(srcdir)/common/common-debug.c
+	$(srcdir)/common/common-debug.c $(srcdir)/common/cleanups.c \
+	$(srcdir)/common/common-exceptions.c $(srcdir)/symbol.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -183,7 +185,8 @@ OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o \
       target.o waitstatus.o utils.o debug.o version.o vec.o gdb_vecs.o \
       mem-break.o hostio.o event-loop.o tracepoint.o xml-utils.o \
       common-utils.o ptid.o buffer.o format.o filestuff.o dll.o notif.o \
-      tdesc.o print-utils.o rsp-low.o errors.o common-debug.o \
+      tdesc.o print-utils.o rsp-low.o errors.o common-debug.o cleanups.o \
+      common-exceptions.o symbol.o \
       $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
@@ -341,7 +344,8 @@ clean:
 	rm -f reg-tilegx.c reg-tilegx32.c
 	rm -f arm-with-iwmmxt.c
 	rm -f arm-with-vfpv2.c arm-with-vfpv3.c arm-with-neon.c
-	rm -f mips-linux.c mips64-linux.c
+	rm -f mips-linux.c mips-dsp-linux.c
+	rm -f mips64-linux.c mips64-dsp-linux.c
 	rm -f nios2-linux.c
 	rm -f powerpc-32.c powerpc-32l.c powerpc-64l.c powerpc-e500l.c
 	rm -f powerpc-altivec32l.c powerpc-cell32l.c powerpc-vsx32l.c
@@ -445,7 +449,7 @@ UST_CFLAGS = $(ustinc) -DCONFIG_UST_GDB_INTEGRATION
 
 # Note, we only build the IPA if -fvisibility=hidden is supported in
 # the first place.
-IPAGENT_CFLAGS = $(CPPFLAGS) $(INTERNAL_CFLAGS) $(UST_CFLAGS) \
+IPAGENT_CFLAGS = $(INTERNAL_CFLAGS) $(UST_CFLAGS) \
 	-fPIC -DIN_PROCESS_AGENT \
 	-fvisibility=hidden
 
@@ -544,13 +548,19 @@ errors.o: ../common/errors.c
 common-debug.o: ../common/common-debug.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
+cleanups.o: ../common/cleanups.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+common-exceptions.o: ../common/common-exceptions.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 waitstatus.o: ../target/waitstatus.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
 # Native object files rules from ../nat
 
-i386-dregs.o: ../nat/i386-dregs.c
+x86-dregs.o: ../nat/x86-dregs.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 linux-btrace.o: ../nat/linux-btrace.c

@@ -23,6 +23,7 @@
 #include "regcache.h"
 #include "elf/common.h"
 #include <sys/ptrace.h>
+#include <sys/uio.h>
 #include "gregset.h"
 #include "gdb_proc_service.h"
 
@@ -30,7 +31,7 @@
 #include "i387-tdep.h"
 #include "i386-tdep.h"
 #include "i386-linux-tdep.h"
-#include "i386-xstate.h"
+#include "x86-xstate.h"
 
 #include "x86-linux-nat.h"
 
@@ -321,7 +322,7 @@ store_fpregs (const struct regcache *regcache, int tid, int regno)
 static int
 fetch_xstateregs (struct regcache *regcache, int tid)
 {
-  char xstateregs[I386_XSTATE_MAX_SIZE];
+  char xstateregs[X86_XSTATE_MAX_SIZE];
   struct iovec iov;
 
   if (!have_ptrace_getregset)
@@ -344,7 +345,7 @@ fetch_xstateregs (struct regcache *regcache, int tid)
 static int
 store_xstateregs (const struct regcache *regcache, int tid, int regno)
 {
-  char xstateregs[I386_XSTATE_MAX_SIZE];
+  char xstateregs[X86_XSTATE_MAX_SIZE];
   struct iovec iov;
 
   if (!have_ptrace_getregset)

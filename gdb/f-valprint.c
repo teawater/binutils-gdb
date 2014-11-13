@@ -33,7 +33,6 @@
 #include "command.h"
 #include "block.h"
 #include "dictionary.h"
-#include "exceptions.h"
 
 extern void _initialize_f_valprint (void);
 static void info_common_command (char *, int);
@@ -349,7 +348,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
 	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, options, 0, stream);
+				      original_value, &opts, 0, stream);
 	}
       else
 	{

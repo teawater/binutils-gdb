@@ -3192,7 +3192,7 @@ add_to_lit_pool (unsigned int nbytes)
   literal_pool * pool;
   unsigned int entry, pool_size = 0;
   bfd_boolean padding_slot_p = FALSE;
-  unsigned imm1;
+  unsigned imm1 = 0;
   unsigned imm2 = 0;
 
   if (nbytes == 8)
@@ -3200,7 +3200,7 @@ add_to_lit_pool (unsigned int nbytes)
       imm1 = inst.operands[1].imm;
       imm2 = (inst.operands[1].regisimm ? inst.operands[1].reg
 	       : inst.reloc.exp.X_unsigned ? 0
-	       : ((int64_t) inst.operands[1].imm) >> 32);
+	       : ((bfd_int64_t) inst.operands[1].imm) >> 32);
       if (target_big_endian)
 	{
 	  imm1 = imm2;
@@ -7812,7 +7812,7 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 			   ? inst.operands[1].reg
 			   : inst.reloc.exp.X_unsigned
 			     ? 0
-			     : ((int64_t)((int) immlo)) >> 32;
+			     : ((bfd_int64_t)((int) immlo)) >> 32;
 	  int cmode = neon_cmode_for_move_imm (immlo, immhi, FALSE, &immbits,
 					       &op, 64, NT_invtype);
 
@@ -20848,7 +20848,8 @@ arm_handle_align (fragS * fragP)
 
   if (fragP->tc_frag_data.thumb_mode & (~ MODE_RECORDED))
     {
-      if (ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6t2))
+      if (ARM_CPU_HAS_FEATURE (selected_cpu_name[0]
+			       ? selected_cpu : arm_arch_none, arm_ext_v6t2))
 	{
 	  narrow_noop = thumb_noop[1][target_big_endian];
 	  noop = wide_thumb_noop[target_big_endian];
@@ -20862,7 +20863,9 @@ arm_handle_align (fragS * fragP)
     }
   else
     {
-      noop = arm_noop[ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6k) != 0]
+      noop = arm_noop[ARM_CPU_HAS_FEATURE (selected_cpu_name[0]
+					   ? selected_cpu : arm_arch_none,
+					   arm_ext_v6k) != 0]
 		     [target_big_endian];
       noop_size = 4;
 #ifdef OBJ_ELF
@@ -24389,6 +24392,8 @@ static const struct arm_cpu_option_table arm_cpus[] =
 								  "Cortex-A12"),
   ARM_CPU_OPT ("cortex-a15",	ARM_ARCH_V7VE,   FPU_ARCH_NEON_VFP_V4,
 								  "Cortex-A15"),
+  ARM_CPU_OPT ("cortex-a17",	ARM_ARCH_V7VE,   FPU_ARCH_NEON_VFP_V4,
+								  "Cortex-A17"),
   ARM_CPU_OPT ("cortex-a53",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A53"),
   ARM_CPU_OPT ("cortex-a57",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
@@ -25108,6 +25113,8 @@ aeabi_set_public_attributes (void)
 
   if (ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_arch_any))
     ARM_MERGE_FEATURE_SETS (flags, flags, arm_ext_v4t);
+
+  selected_cpu = flags;
 
   /* Allow the user to override the reported architecture.  */
   if (object_arch)

@@ -133,7 +133,7 @@ static target_xfer_partial_ftype procfs_xfer_partial;
 
 static int procfs_thread_alive (struct target_ops *ops, ptid_t);
 
-static void procfs_find_new_threads (struct target_ops *ops);
+static void procfs_update_thread_list (struct target_ops *ops);
 static char *procfs_pid_to_str (struct target_ops *, ptid_t);
 
 static int proc_find_memory_regions (struct target_ops *self,
@@ -196,7 +196,7 @@ procfs_target (void)
   t->to_files_info = procfs_files_info;
   t->to_stop = procfs_stop;
 
-  t->to_find_new_threads = procfs_find_new_threads;
+  t->to_update_thread_list = procfs_update_thread_list;
   t->to_thread_alive = procfs_thread_alive;
   t->to_pid_to_str = procfs_pid_to_str;
 
@@ -2902,13 +2902,6 @@ static void do_detach (int signo);
 static void proc_trace_syscalls_1 (procinfo *pi, int syscallnum,
 				   int entry_or_exit, int mode, int from_tty);
 
-/* On mips-irix, we need to insert a breakpoint at __dbx_link during
-   the startup phase.  The following two variables are used to record
-   the address of the breakpoint, and the code that was replaced by
-   a breakpoint.  */
-static int dbx_link_bpt_addr = 0;
-static void *dbx_link_bpt;
-
 /* Sets up the inferior to be debugged.  Registers to trace signals,
    hardware faults, and syscalls.  Note: does not set RLC flag: caller
    may want to customize that.  Returns zero for success (note!
@@ -2924,16 +2917,9 @@ procfs_debug_inferior (procinfo *pi)
   sysset_t *traced_syscall_exits;
   int status;
 
-#ifdef PROCFS_DONT_TRACE_FAULTS
-  /* On some systems (OSF), we don't trace hardware faults.
-     Apparently it's enough that we catch them as signals.
-     Wonder why we don't just do that in general?  */
-  premptyset (&traced_faults);		/* don't trace faults.  */
-#else
   /* Register to trace hardware faults in the child.  */
   prfillset (&traced_faults);		/* trace all faults...  */
   gdb_prdelset  (&traced_faults, FLTPAGE);	/* except page fault.  */
-#endif
   if (!proc_set_traced_faults  (pi, &traced_faults))
     return __LINE__;
 
@@ -3380,23 +3366,6 @@ syscall_is_lwp_create (procinfo *pi, int scall)
   return 0;
 }
 
-/* Remove the breakpoint that we inserted in __dbx_link().
-   Does nothing if the breakpoint hasn't been inserted or has already
-   been removed.  */
-
-static void
-remove_dbx_link_breakpoint (void)
-{
-  if (dbx_link_bpt_addr == 0)
-    return;
-
-  if (deprecated_remove_raw_breakpoint (target_gdbarch (), dbx_link_bpt) != 0)
-    warning (_("Unable to remove __dbx_link breakpoint."));
-
-  dbx_link_bpt_addr = 0;
-  dbx_link_bpt = NULL;
-}
-
 #ifdef SYS_syssgi
 /* Return the address of the __dbx_link() function in the file
    refernced by ABFD by scanning its symbol table.  Return 0 if
@@ -3461,10 +3430,12 @@ insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
   sym_addr = dbx_link_addr (abfd);
   if (sym_addr != 0)
     {
+      struct breakpoint *dbx_link_bpt;
+
       /* Insert the breakpoint.  */
-      dbx_link_bpt_addr = sym_addr;
-      dbx_link_bpt = deprecated_insert_raw_breakpoint (target_gdbarch (), NULL,
-						       sym_addr);
+      dbx_link_bpt
+	= create_and_insert_solib_event_breakpoint (target_gdbarch (),
+						    sym_addr);
       if (dbx_link_bpt == NULL)
 	{
 	  warning (_("Failed to insert dbx_link breakpoint."));
@@ -3894,14 +3865,6 @@ wait_again:
 #if (FLTTRACE != FLTBPT)	/* Avoid "duplicate case" error.  */
 		case FLTTRACE:
 #endif
-		  /* If we hit our __dbx_link() internal breakpoint,
-		     then remove it.  See comments in procfs_init_inferior()
-		     for more details.	*/
-		  if (dbx_link_bpt_addr != 0
-		      && dbx_link_bpt_addr
-			 == regcache_read_pc (get_current_regcache ()))
-		    remove_dbx_link_breakpoint ();
-
 		  wstat = (SIGTRAP << 8) | 0177;
 		  break;
 		case FLTSTACK:
@@ -4257,16 +4220,6 @@ unconditionally_kill_inferior (procinfo *pi)
   int parent_pid;
 
   parent_pid = proc_parent_pid (pi);
-#ifdef PROCFS_NEED_CLEAR_CURSIG_FOR_KILL
-  /* FIXME: use access functions.  */
-  /* Alpha OSF/1-3.x procfs needs a clear of the current signal
-     before the PIOCKILL, otherwise it might generate a corrupted core
-     file for the inferior.  */
-  if (ioctl (pi->ctl_fd, PIOCSSIG, NULL) < 0)
-    {
-      printf_filtered ("unconditionally_kill: SSIG failed!\n");
-    }
-#endif
 #ifdef PROCFS_NEED_PIOCSSIG_FOR_KILL
   /* Alpha OSF/1-2.x procfs needs a PIOCSSIG call with a SIGKILL signal
      to kill the inferior, otherwise it might remain stopped with a
@@ -4339,13 +4292,6 @@ procfs_mourn_inferior (struct target_ops *ops)
     }
 
   generic_mourn_inferior ();
-
-  if (dbx_link_bpt != NULL)
-    {
-      deprecated_remove_raw_breakpoint (target_gdbarch (), dbx_link_bpt);
-      dbx_link_bpt_addr = 0;
-      dbx_link_bpt = NULL;
-    }
 
   inf_child_maybe_unpush_target (ops);
 }
@@ -4683,7 +4629,7 @@ procfs_inferior_created (struct target_ops *ops, int from_tty)
 #endif
 }
 
-/* Callback for find_new_threads.  Calls "add_thread".  */
+/* Callback for update_thread_list.  Calls "add_thread".  */
 
 static int
 procfs_notice_thread (procinfo *pi, procinfo *thread, void *ptr)
@@ -4700,9 +4646,11 @@ procfs_notice_thread (procinfo *pi, procinfo *thread, void *ptr)
    back to GDB to add to its list.  */
 
 static void
-procfs_find_new_threads (struct target_ops *ops)
+procfs_update_thread_list (struct target_ops *ops)
 {
   procinfo *pi;
+
+  prune_threads ();
 
   /* Find procinfo for main process.  */
   pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);
@@ -5371,7 +5319,7 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
   /* This part is the old method for fetching registers.
      It should be replaced by the newer one using regsets
      once it is implemented in this platform:
-     gdbarch_regset_from_core_section() and regset->collect_regset().  */
+     gdbarch_iterate_over_regset_sections().  */
 
   old_chain = save_inferior_ptid ();
   inferior_ptid = ptid;

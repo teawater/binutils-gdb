@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include "exceptions.h"
 #include "charset.h"
 #include "gdbcmd.h"
 #include "cli/cli-decode.h"
@@ -531,7 +530,7 @@ gdbscm_parse_command_name (const char *name,
 
   prefix_text2 = prefix_text;
   elt = lookup_cmd_1 (&prefix_text2, *start_list, NULL, 1);
-  if (!elt || elt == (struct cmd_list_element *) -1)
+  if (elt == NULL || elt == CMD_LIST_AMBIGUOUS)
     {
       msg = xstrprintf (_("could not find command prefix '%s'"), prefix_text);
       xfree (prefix_text);
